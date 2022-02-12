@@ -34,7 +34,6 @@ local function change_theme_if_needed(is_dark_mode)
 end
 
 local function start_check_timer()
-    print(update_interval)
     timer_id = vim.fn.timer_start(update_interval, function()
         check_is_dark_mode(change_theme_if_needed)
     end, {['repeat'] = -1})
