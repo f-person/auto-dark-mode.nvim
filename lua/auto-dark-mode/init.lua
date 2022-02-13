@@ -40,6 +40,9 @@ local function start_check_timer()
 end
 
 local function init()
+    local current_os = utils.get_os()
+    if current_os ~= 'darwin' then return end
+
     if not set_dark_mode or not set_light_mode then
         error([[
 
