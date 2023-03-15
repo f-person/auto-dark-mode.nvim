@@ -38,4 +38,23 @@ function M.get_os()
 	end
 end
 
+--- Caching `is_root` to avoid checking it every time
+---@type boolean
+local is_root
+
+---@param callback fun(result: boolean)
+function M.check_is_root(callback)
+	if is_root ~= nil then
+		callback(is_root)
+		return
+	end
+
+	M.start_job("id -u", {
+		on_stdout = function(result)
+			is_root = result[1] == "0"
+			callback(is_root)
+		end,
+	})
+end
+
 return M

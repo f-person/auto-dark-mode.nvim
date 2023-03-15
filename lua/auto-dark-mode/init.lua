@@ -13,12 +13,20 @@ local update_interval
 
 ---@param callback fun(is_dark_mode: boolean)
 local function check_is_dark_mode(callback)
-	utils.start_job("defaults read -g AppleInterfaceStyle", {
-		on_exit = function(exit_code)
-			local is_dark_mode = exit_code == 0
-			callback(is_dark_mode)
-		end,
-	})
+	utils.check_is_root(function(is_root)
+		local defaults_command = "defaults read -g AppleInterfaceStyle"
+
+		if is_root then
+			defaults_command = 'su - $SUDO_USER -c "' .. defaults_command .. '"'
+		end
+
+		utils.start_job(defaults_command, {
+			on_exit = function(exit_code)
+				local is_dark_mode = exit_code == 0
+				callback(is_dark_mode)
+			end,
+		})
+	end)
 end
 
 ---@param is_dark_mode boolean
