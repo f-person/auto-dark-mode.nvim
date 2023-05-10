@@ -45,3 +45,9 @@ You can disable `aut-dark-mode.nvim` at runtime via `lua require('aut-dark-mode'
 ## Requirements
 * macOS
 * Neovim
+
+# Support
+If you enjoy the plugin and want to support what I do
+
+
+<a href="https://www.buymeacoffee.com/fperson" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41"  width="174"></a>
