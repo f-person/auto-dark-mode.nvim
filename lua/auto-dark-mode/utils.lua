@@ -12,9 +12,10 @@ function M.start_job(cmd, opts)
 				opts.on_stdout(data)
 			end
 		end,
-		on_exit = function(_, data, _)
+		on_exit = function(id, data, _)
 			if opts.on_exit then
 				opts.on_exit(data)
+				vim.fn.jobstop(id)
 			end
 		end,
 	})
