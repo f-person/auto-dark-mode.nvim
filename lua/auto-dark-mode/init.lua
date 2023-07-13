@@ -1,32 +1,41 @@
 local utils = require("auto-dark-mode.utils")
 
+---@type number
 local timer_id
 ---@type boolean
 local is_currently_dark_mode
 
----@type fun()
-local set_dark_mode, set_light_mode
+---@type fun(): nil
+local set_dark_mode
+---@type fun(): nil
+local set_light_mode
 
----Every `update_interval` milliseconds a theme check will be performed.
 ---@type number
 local update_interval
 
+---@type string
+local query_command
+---@type "Linux" | "Darwin"
+local system
+
+---@param res string
+---@return boolean
+local function parse_query_response(res)
+	if system == "Linux" then
+		return string.match(res, "uint32 1") ~= nil
+	elseif system == "Darwin" then
+		return res == "Dark"
+	end
+	return false
+end
+
 ---@param callback fun(is_dark_mode: boolean)
 local function check_is_dark_mode(callback)
-	utils.check_is_root(function(is_root)
-		local defaults_command = "defaults read -g AppleInterfaceStyle"
-
-		if is_root then
-			defaults_command = 'su - $SUDO_USER -c "' .. defaults_command .. '"'
-		end
-
-		utils.start_job(defaults_command, {
-			on_exit = function(exit_code)
-				local is_dark_mode = exit_code == 0
-				callback(is_dark_mode)
-			end,
-		})
-	end)
+	utils.start_job(query_command, {
+		on_stdout = function(data)
+			callback(parse_query_response(data[1]))
+		end,
+	})
 end
 
 ---@param is_dark_mode boolean
@@ -50,23 +59,44 @@ local function start_check_timer()
 end
 
 local function init()
-	local current_os = utils.get_os()
-	if current_os ~= "darwin" then
+	system = vim.loop.os_uname().sysname
+
+	if system == "Darwin" then
+		query_command = "defaults read -g AppleInterfaceStyle"
+	elseif system == "Linux" then
+		if not vim.fn.executable("dbus-send") then
+			error([[
+        `dbus-send` is not available. The Linux implementation of
+        auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
+      ]])
+		end
+
+		query_command = "dbus-send --session --print-reply=literal --reply-timeout=1000 "
+			.. "--dest=org.freedesktop.portal.Desktop "
+			.. "/org/freedesktop/portal/desktop "
+			.. "org.freedesktop.portal.Settings.Read "
+			.. "string:'org.freedesktop.appearance' "
+			.. "string:'color-scheme'"
+	else
 		return
 	end
 
-	if not set_dark_mode or not set_light_mode then
+	if vim.loop.getuid() == 0 then
+		query_command = "su - $SUDO_USER -c " .. query_command
+	end
+
+	if type(set_dark_mode) ~= "function" or type(set_light_mode) ~= "function" then
 		error([[
 
         Call `setup` first:
 
         require('auto-dark-mode').setup({
             set_dark_mode=function()
-                vim.api.nvim_set_option('background', 'dark')
+                vim.api.nvim_set_option_value('background', 'dark')
                 vim.cmd('colorscheme gruvbox')
             end,
             set_light_mode=function()
-                vim.api.nvim_set_option('background', 'light')
+                vim.api.nvim_set_option_value('background', 'light')
             end,
         })
         ]])
@@ -80,14 +110,14 @@ local function disable()
 	vim.fn.timer_stop(timer_id)
 end
 
----@param options table<string, fun()>
----`options` contains two function - `set_dark_mode` and `set_light_mode`
+--`options` contains two function - `set_dark_mode` and `set_light_mode`
+---@param options AutoDarkModeOptions?
 local function setup(options)
 	options = options or {}
 
 	---@param background string
 	local function set_background(background)
-		vim.api.nvim_set_option("background", background)
+		vim.api.nvim_set_option_value("background", background, {})
 	end
 
 	set_dark_mode = options.set_dark_mode or function()
@@ -97,6 +127,8 @@ local function setup(options)
 		set_background("light")
 	end
 	update_interval = options.update_interval or 3000
+
+	init()
 end
 
 return { setup = setup, init = init, disable = disable }

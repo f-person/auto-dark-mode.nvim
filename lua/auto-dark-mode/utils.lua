@@ -1,7 +1,7 @@
 local M = {}
 
 ---@param cmd string
----@param opts table
+---@param opts {input?: string, on_stdout?: function, on_exit?: function}
 ---@return number | 'the job id'
 function M.start_job(cmd, opts)
 	opts = opts or {}
@@ -25,36 +25,6 @@ function M.start_job(cmd, opts)
 	end
 
 	return id
-end
-
----@return 'win'|'darwin'|'linux'
-function M.get_os()
-	if package.config:sub(1, 1) == "\\" then
-		return "win"
-	elseif (io.popen("uname -s"):read("*a")):match("Darwin") then
-		return "darwin"
-	else
-		return "linux"
-	end
-end
-
---- Caching `is_root` to avoid checking it every time
----@type boolean
-local is_root
-
----@param callback fun(result: boolean)
-function M.check_is_root(callback)
-	if is_root ~= nil then
-		callback(is_root)
-		return
-	end
-
-	M.start_job("id -u", {
-		on_stdout = function(result)
-			is_root = result[1] == "0"
-			callback(is_root)
-		end,
-	})
 end
 
 return M
