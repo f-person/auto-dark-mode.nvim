@@ -5,9 +5,9 @@ local timer_id
 ---@type boolean
 local is_currently_dark_mode
 
----@type fun(): nil
+---@type fun(): nil | nil
 local set_dark_mode
----@type fun(): nil
+---@type fun(): nil | nil
 local set_light_mode
 
 ---@type number
@@ -18,10 +18,15 @@ local query_command
 ---@type "Linux" | "Darwin"
 local system
 
+-- Parses the query response for each system
 ---@param res string
 ---@return boolean
 local function parse_query_response(res)
 	if system == "Linux" then
+		-- https://github.com/flatpak/xdg-desktop-portal/blob/c0f0eb103effdcf3701a1bf53f12fe953fbf0b75/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
+		-- 0: no preference
+		-- 1: dark
+		-- 2: light
 		return string.match(res, "uint32 1") ~= nil
 	elseif system == "Darwin" then
 		return res == "Dark"
@@ -33,7 +38,9 @@ end
 local function check_is_dark_mode(callback)
 	utils.start_job(query_command, {
 		on_stdout = function(data)
-			callback(parse_query_response(data[1]))
+			-- we only care about the first line of the response
+			local is_dark_mode = parse_query_response(data[1])
+			callback(is_dark_mode)
 		end,
 	})
 end
