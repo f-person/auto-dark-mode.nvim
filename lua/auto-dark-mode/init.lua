@@ -119,8 +119,7 @@ local function disable()
 	vim.fn.timer_stop(timer_id)
 end
 
---`options` contains two function - `set_dark_mode` and `set_light_mode`
----@param options AutoDarkModeOptions?
+---@param options AutoDarkModeOptions
 local function setup(options)
 	options = options or {}
 
