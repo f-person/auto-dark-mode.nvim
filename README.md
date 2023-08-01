@@ -1,9 +1,15 @@
 # auto-dark-mode.nvim
 A Neovim plugin for macOS that automatically changes the editor appearance
 based on system settings.
-![demo](assets/demo.gif?raw=true)
+
+<!-- panvimdoc-ignore-start -->
+<p align="center">
+    <img src="assets/demo.gif?raw=true" alt="demo"/>
+</p>
+<!-- panvimdoc-ignore-end -->
 
 ## Installation
+
 ### Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim

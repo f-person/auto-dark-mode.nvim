@@ -1,0 +1,26 @@
+name: panvimdoc
+
+on:
+  push:
+    paths: ["**.md"]
+
+permissions:
+  contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    name: README to vimdoc
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: kdheepak/panvimdoc@main
+        with:
+          vimdoc: auto-dark-mode
+          description: Plugin that automatically changes the editor appearance based on system settings.
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "docs: auto-generate vimdoc"
+          commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          branch: ${{ github.head_ref }}
