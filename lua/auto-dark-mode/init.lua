@@ -78,12 +78,14 @@ local function init()
       ]])
 		end
 
-		query_command = "dbus-send --session --print-reply=literal --reply-timeout=1000 "
-			.. "--dest=org.freedesktop.portal.Desktop "
-			.. "/org/freedesktop/portal/desktop "
-			.. "org.freedesktop.portal.Settings.Read "
-			.. "string:'org.freedesktop.appearance' "
-			.. "string:'color-scheme'"
+		query_command = table.concat({
+			"dbus-send --session --print-reply=literal --reply-timeout=1000",
+			"--dest=org.freedesktop.portal.Desktop",
+			"/org/freedesktop/portal/desktop",
+			"org.freedesktop.portal.Settings.Read",
+			"string:'org.freedesktop.appearance'",
+			"string:'color-scheme'",
+		}, " ")
 	else
 		return
 	end
