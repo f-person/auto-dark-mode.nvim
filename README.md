@@ -5,7 +5,7 @@ based on system settings.
 <!-- panvimdoc-ignore-start -->
 |   |   |
 |---|---|
-| ![demo](assets/demo.gif?raw=true) | ![linux demo](assets/demo-linux.gif?raw=true) |
+| ![demo](https://user-images.githubusercontent.com/79978224/257745167-36f16e78-e4d0-47d7-a395-8b2abba8ea88.gif) | ![linux demo](https://user-images.githubusercontent.com/79978224/257745238-699764e1-2fcb-4c47-b353-7c90235a12e1.gif) |
 <!-- panvimdoc-ignore-end -->
 
 ## Installation
