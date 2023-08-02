@@ -71,7 +71,7 @@ You can disable `auto-dark-mode.nvim` at runtime via `lua require('auto-dark-mod
 * Neovim
 
 ## Thanks To
-* @nekowinston for implementing Linux support and other contributions! <3
+* [@nekowinston](https://github.com/nekowinston) for implementing Linux support and other contributions! <3
 
 # Support
 If you enjoy the plugin and want to support what I do
