@@ -3,9 +3,10 @@ A Neovim plugin for macOS that automatically changes the editor appearance
 based on system settings.
 
 <!-- panvimdoc-ignore-start -->
-<p align="center">
-    <img src="assets/demo.gif?raw=true" alt="demo"/>
-</p>
+<div style="display: flex; justify-content: center;">
+    <img src="assets/demo.gif?raw=true" alt="demo" style="max-width: 800px; object-fit: contain;"/>
+    <img src="assets/demo-linux.gif?raw=true" alt="linux demo" style="max-width: 800px; object-fit: contain;"/>
+</div>
 <!-- panvimdoc-ignore-end -->
 
 ## Installation
