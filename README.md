@@ -3,10 +3,9 @@ A Neovim plugin for macOS that automatically changes the editor appearance
 based on system settings.
 
 <!-- panvimdoc-ignore-start -->
-<div style="display: flex; justify-content: center;">
-    <img src="assets/demo.gif?raw=true" alt="demo" style="max-width: 800px; object-fit: contain;"/>
-    <img src="assets/demo-linux.gif?raw=true" alt="linux demo" style="max-width: 800px; object-fit: contain;"/>
-</div>
+|   |   |
+|---|---|
+| ![demo](assets/demo.gif?raw=true) | ![linux demo](assets/demo-linux.gif?raw=true) |
 <!-- panvimdoc-ignore-end -->
 
 ## Installation
@@ -71,8 +70,10 @@ You can disable `auto-dark-mode.nvim` at runtime via `lua require('auto-dark-mod
 * macOS or a Linux environment that implements [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629)
 * Neovim
 
+## Thanks To
+* @nekowinston for implementing Linux support and other contributions! <3
+
 # Support
 If you enjoy the plugin and want to support what I do
-
 
 <a href="https://www.buymeacoffee.com/fperson" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41"  width="174"></a>
