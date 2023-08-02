@@ -91,7 +91,7 @@ REQUIREMENTS                 *auto-dark-mode-auto-dark-mode.nvim-requirements*
 
 THANKS TO                       *auto-dark-mode-auto-dark-mode.nvim-thanks-to*
 
-- @nekowinston for implementing Linux support and other contributions! <3
+- @nekowinston <https://github.com/nekowinston> for implementing Linux support and other contributions! <3
 
 
 ==============================================================================
