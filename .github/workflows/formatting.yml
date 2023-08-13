@@ -1,0 +1,21 @@
+name: StyLua
+
+on:
+  pull_request:
+  push:
+    paths-ignore:
+      - "*.md"
+    branches: [master]
+
+jobs:
+  stylua:
+    name: StyLua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: JohnnyMorganz/stylua-action@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: v0.18.1
+          args: --check .
