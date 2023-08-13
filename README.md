@@ -1,11 +1,11 @@
 # auto-dark-mode.nvim
-A Neovim plugin for macOS that automatically changes the editor appearance
-based on system settings.
+A Neovim plugin for macOS, Linux, and Windows that automatically changes the
+editor appearance based on system settings.
 
 <!-- panvimdoc-ignore-start -->
 |   |   |
 |---|---|
-| ![demo](https://user-images.githubusercontent.com/79978224/257745167-36f16e78-e4d0-47d7-a395-8b2abba8ea88.gif) | ![linux demo](https://user-images.githubusercontent.com/79978224/257745238-699764e1-2fcb-4c47-b353-7c90235a12e1.gif) |
+| ![macos demo](https://user-images.githubusercontent.com/79978224/257745167-36f16e78-e4d0-47d7-a395-8b2abba8ea88.gif) | ![linux demo](https://user-images.githubusercontent.com/79978224/257745238-699764e1-2fcb-4c47-b353-7c90235a12e1.gif) |
 <!-- panvimdoc-ignore-end -->
 
 ## Installation
@@ -15,6 +15,12 @@ based on system settings.
 ```vim
 Plug 'f-person/auto-dark-mode.nvim'
 ```
+
+## Requirements
+* macOS, a Linux environment that implements
+  [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629),
+  or Windows 10+
+* Neovim
 
 ## Configuration
 You need to call `setup` for initialization.
@@ -65,10 +71,6 @@ return {
 
 #### Disable
 You can disable `auto-dark-mode.nvim` at runtime via `lua require('auto-dark-mode').disable()`.
-
-## Requirements
-* macOS or a Linux environment that implements [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629)
-* Neovim
 
 ## Thanks To
 * [@nekowinston](https://github.com/nekowinston) for implementing Linux support and other contributions! <3

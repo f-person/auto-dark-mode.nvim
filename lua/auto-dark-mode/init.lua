@@ -84,10 +84,19 @@ local function init()
 
 		query_command = table.concat({
 			"dbus-send --session --print-reply=literal --reply-timeout=1000",
+<<<<<<< HEAD
+			"--dest=org.freedesktop.portal.Desktop",
+			"/org/freedesktop/portal/desktop",
+			"org.freedesktop.portal.Settings.Read",
+			"string:'org.freedesktop.appearance'",
+			"string:'color-scheme'",
+		}, " ")
+=======
 			"--dest=org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
 			"org.freedesktop.portal.Settings.Read", "string:'org.freedesktop.appearance'",
 			"string:'color-scheme'"
 			}, " ")
+>>>>>>> 2c41f4d087be0c006f0a0a5f7b6b5d94a5ee90a3
 	elseif system == "Windows_NT" then
 		-- Don't swap the quotes; it breaks the code
 		query_command =
