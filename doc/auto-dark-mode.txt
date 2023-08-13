@@ -5,16 +5,16 @@ Table of Contents                           *auto-dark-mode-table-of-contents*
 
 1. auto-dark-mode.nvim                    |auto-dark-mode-auto-dark-mode.nvim|
   - Installation             |auto-dark-mode-auto-dark-mode.nvim-installation|
-  - Configuration           |auto-dark-mode-auto-dark-mode.nvim-configuration|
   - Requirements             |auto-dark-mode-auto-dark-mode.nvim-requirements|
+  - Configuration           |auto-dark-mode-auto-dark-mode.nvim-configuration|
   - Thanks To                   |auto-dark-mode-auto-dark-mode.nvim-thanks-to|
 2. Support                                            |auto-dark-mode-support|
 
 ==============================================================================
 1. auto-dark-mode.nvim                    *auto-dark-mode-auto-dark-mode.nvim*
 
-A Neovim plugin for macOS that automatically changes the editor appearance
-based on system settings.
+A Neovim plugin for macOS, Linux, and Windows that automatically changes the
+editor appearance based on system settings.
 
 
 INSTALLATION                 *auto-dark-mode-auto-dark-mode.nvim-installation*
@@ -25,6 +25,14 @@ USING VIM-PLUG ~
 >vim
     Plug 'f-person/auto-dark-mode.nvim'
 <
+
+
+REQUIREMENTS                 *auto-dark-mode-auto-dark-mode.nvim-requirements*
+
+- macOS, a Linux environment that implements
+    `org.freedesktop.appearance.color-scheme` <https://github.com/flatpak/xdg-desktop-portal/issues/629>,
+    or Windows 10+
+- Neovim
 
 
 CONFIGURATION               *auto-dark-mode-auto-dark-mode.nvim-configuration*
@@ -81,12 +89,6 @@ DISABLE
 
 You can disable `auto-dark-mode.nvim` at runtime via `lua
 require('auto-dark-mode').disable()`.
-
-
-REQUIREMENTS                 *auto-dark-mode-auto-dark-mode.nvim-requirements*
-
-- macOS or a Linux environment that implements `org.freedesktop.appearance.color-scheme` <https://github.com/flatpak/xdg-desktop-portal/issues/629>
-- Neovim
 
 
 THANKS TO                       *auto-dark-mode-auto-dark-mode.nvim-thanks-to*
