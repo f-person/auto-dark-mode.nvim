@@ -15,7 +15,7 @@ local update_interval
 
 ---@type string
 local query_command
----@type "Linux" | "Darwin"
+---@type "Linux" | "Darwin" | "Windows_NT"
 local system
 
 -- Parses the query response for each system
@@ -30,6 +30,10 @@ local function parse_query_response(res)
 		return string.match(res, "uint32 1") ~= nil
 	elseif system == "Darwin" then
 		return res == "Dark"
+	elseif system == "Windows_NT" then
+		-- AppsUseLightTheme    REG_DWORD    0x0 : dark
+		-- AppsUseLightTheme    REG_DWORD    0x1 : light
+		return string.match(res, "1") == nil
 	end
 	return false
 end
@@ -73,42 +77,46 @@ local function init()
 	elseif system == "Linux" then
 		if not vim.fn.executable("dbus-send") then
 			error([[
-        `dbus-send` is not available. The Linux implementation of
-        auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
-      ]])
+		`dbus-send` is not available. The Linux implementation of
+		auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
+	  ]])
 		end
 
 		query_command = table.concat({
 			"dbus-send --session --print-reply=literal --reply-timeout=1000",
-			"--dest=org.freedesktop.portal.Desktop",
-			"/org/freedesktop/portal/desktop",
-			"org.freedesktop.portal.Settings.Read",
-			"string:'org.freedesktop.appearance'",
-			"string:'color-scheme'",
-		}, " ")
+			"--dest=org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
+			"org.freedesktop.portal.Settings.Read", "string:'org.freedesktop.appearance'",
+			"string:'color-scheme'"
+			}, " ")
+	elseif system == "Windows_NT" then
+		-- Don't swap the quotes; it breaks the code
+		query_command =
+			'Reg Query "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme | findstr "AppsUseLightTheme"'
 	else
 		return
 	end
 
-	if vim.loop.getuid() == 0 then
-		query_command = "su - $SUDO_USER -c " .. query_command
+	if system == "Linux" or system == "Darwin" then
+		if vim.loop.getuid() == 0 then
+			query_command = "su - $SUDO_USER -c " .. query_command
+		end
 	end
 
 	if type(set_dark_mode) ~= "function" or type(set_light_mode) ~= "function" then
 		error([[
 
-        Call `setup` first:
+		Call `setup` first:
 
-        require('auto-dark-mode').setup({
-            set_dark_mode=function()
-                vim.api.nvim_set_option_value('background', 'dark')
-                vim.cmd('colorscheme gruvbox')
-            end,
-            set_light_mode=function()
-                vim.api.nvim_set_option_value('background', 'light')
-            end,
-        })
-        ]])
+		require('auto-dark-mode').setup({
+			set_dark_mode=function()
+				vim.api.nvim_set_option_value('background', 'dark')
+				vim.cmd('colorscheme gruvbox')
+			end,
+			set_light_mode=function()
+				vim.api.nvim_set_option_value('background', 'light')
+			end,
+		})
+		]])
 	end
 
 	check_is_dark_mode(change_theme_if_needed)
