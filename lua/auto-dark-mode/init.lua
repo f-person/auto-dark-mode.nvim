@@ -96,7 +96,7 @@ local function init()
 		return
 	end
 
-	if system == "Linux" or system == "Darwin" then
+	if vim.fn.has("unix") then
 		if vim.loop.getuid() == 0 then
 			query_command = "su - $SUDO_USER -c " .. query_command
 		end
