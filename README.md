@@ -16,6 +16,16 @@ editor appearance based on system settings.
 </div>
 
 </details>
+
+<details>
+<summary>Windows demo</summary>
+
+<div style="display: flex; justify-content: center;">
+	<img src="https://user-images.githubusercontent.com/25822972/260328314-20057463-a27c-4296-a701-3b7603aa0781.gif" alt="Windows demo" style="max-width: 800px; object-fit: contain;"/>
+</div>
+
+</details>
+
 <!-- panvimdoc-ignore-end -->
 
 ## Installation
@@ -84,6 +94,7 @@ You can disable `auto-dark-mode.nvim` at runtime via `lua require('auto-dark-mod
 
 ## Thanks To
 * [@nekowinston](https://github.com/nekowinston) for implementing Linux support and other contributions! <3
+* [@adityamwagh](https://github.com/adityamwagh) for implementing Windows support
 
 # Support
 If you enjoy the plugin and want to support what I do
