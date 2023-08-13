@@ -3,9 +3,19 @@ A Neovim plugin for macOS, Linux, and Windows that automatically changes the
 editor appearance based on system settings.
 
 <!-- panvimdoc-ignore-start -->
-|   |   |
-|---|---|
-| ![macos demo](https://user-images.githubusercontent.com/79978224/257745167-36f16e78-e4d0-47d7-a395-8b2abba8ea88.gif) | ![linux demo](https://user-images.githubusercontent.com/79978224/257745238-699764e1-2fcb-4c47-b353-7c90235a12e1.gif) |
+
+<div style="display: flex; justify-content: center;">
+	<img src="https://user-images.githubusercontent.com/79978224/257745167-36f16e78-e4d0-47d7-a395-8b2abba8ea88.gif" alt="macOS demo" style="max-width: 800px; object-fit: contain;"/>
+</div>
+
+<details>
+<summary>Linux demo</summary>
+
+<div style="display: flex; justify-content: center;">
+	<img src="https://user-images.githubusercontent.com/79978224/257745238-699764e1-2fcb-4c47-b353-7c90235a12e1.gif" alt="Linux demo" style="max-width: 800px; object-fit: contain;"/>
+</div>
+
+</details>
 <!-- panvimdoc-ignore-end -->
 
 ## Installation
