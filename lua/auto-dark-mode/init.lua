@@ -15,7 +15,7 @@ local update_interval
 
 ---@type string
 local query_command
----@type "Linux" | "Darwin" | "Windows_NT"
+---@type "Linux" | "Darwin" | "Windows_NT" | "WSL"
 local system
 
 -- Parses the query response for each system
@@ -33,6 +33,8 @@ local function parse_query_response(res)
 	elseif system == "Windows_NT" then
 		-- AppsUseLightTheme    REG_DWORD    0x0 : dark
 		-- AppsUseLightTheme    REG_DWORD    0x1 : light
+		return string.match(res, "1") == nil
+	elseif system == "WSL" then
 		return string.match(res, "1") == nil
 	end
 	return false
@@ -71,6 +73,9 @@ end
 
 local function init()
 	system = vim.loop.os_uname().sysname
+	if string.match(vim.loop.os_uname().release, 'WSL') then
+		system = "WSL"
+	end
 
 	if system == "Darwin" then
 		query_command = "defaults read -g AppleInterfaceStyle"
@@ -90,6 +95,9 @@ local function init()
 			"string:'org.freedesktop.appearance'",
 			"string:'color-scheme'",
 		}, " ")
+	elseif system == "WSL" then
+		query_command =
+			'reg.exe Query "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme | grep "AppsUseLightTheme"'
 	elseif system == "Windows_NT" then
 		-- Don't swap the quotes; it breaks the code
 		query_command =

@@ -39,7 +39,7 @@ Plug 'f-person/auto-dark-mode.nvim'
 ## Requirements
 * macOS, a Linux environment that implements
   [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629),
-  or Windows 10+
+  Windows 10+ or WSL
 * Neovim
 
 ## Configuration
