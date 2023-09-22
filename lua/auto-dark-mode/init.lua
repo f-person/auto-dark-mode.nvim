@@ -30,11 +30,9 @@ local function parse_query_response(res)
 		return string.match(res, "uint32 1") ~= nil
 	elseif system == "Darwin" then
 		return res == "Dark"
-	elseif system == "Windows_NT" then
+	elseif system == "Windows_NT" or system == "WSL" then
 		-- AppsUseLightTheme    REG_DWORD    0x0 : dark
 		-- AppsUseLightTheme    REG_DWORD    0x1 : light
-		return string.match(res, "1") == nil
-	elseif system == "WSL" then
 		return string.match(res, "1") == nil
 	end
 	return false
@@ -72,9 +70,10 @@ local function start_check_timer()
 end
 
 local function init()
-	system = vim.loop.os_uname().sysname
 	if string.match(vim.loop.os_uname().release, 'WSL') then
 		system = "WSL"
+	else
+		system = vim.loop.os_uname().sysname
 	end
 
 	if system == "Darwin" then
@@ -95,13 +94,10 @@ local function init()
 			"string:'org.freedesktop.appearance'",
 			"string:'color-scheme'",
 		}, " ")
-	elseif system == "WSL" then
-		query_command =
-			'reg.exe Query "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme | grep "AppsUseLightTheme"'
-	elseif system == "Windows_NT" then
+	elseif system == "Windows_NT" or system == "WSL" then
 		-- Don't swap the quotes; it breaks the code
 		query_command =
-			'Reg Query "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme | findstr "AppsUseLightTheme"'
+			'reg.exe Query "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme | findstr.exe "AppsUseLightTheme"'
 	else
 		return
 	end
