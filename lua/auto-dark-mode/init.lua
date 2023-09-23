@@ -70,7 +70,7 @@ local function start_check_timer()
 end
 
 local function init()
-	if string.match(vim.loop.os_uname().release, 'WSL') then
+	if string.match(vim.loop.os_uname().release, "WSL") then
 		system = "WSL"
 	else
 		system = vim.loop.os_uname().sysname
