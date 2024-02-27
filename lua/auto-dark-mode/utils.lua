@@ -1,6 +1,6 @@
 local M = {}
 
----@param cmd string
+---@param cmd table
 ---@param opts {input?: string, on_stdout?: function, on_exit?: function}
 ---@return number | 'the job id'
 function M.start_job(cmd, opts)
