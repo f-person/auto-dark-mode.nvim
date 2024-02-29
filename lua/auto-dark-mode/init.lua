@@ -95,15 +95,20 @@ local function init()
 		})
 	elseif system == "Windows_NT" or system == "WSL" then
 		-- Don't swap the quotes; it breaks the code
-		query_command =
-			{ "reg.exe", "Query", "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme" }
+		query_command = {
+			"reg.exe",
+			"Query",
+			"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+			"/v",
+			"AppsUseLightTheme",
+		}
 	else
 		return
 	end
 
 	if vim.fn.has("unix") ~= 0 then
 		if vim.loop.getuid() == 0 then
-			query_command = vim.tbl_extend("keep", { "su", "-", "$SUDO_USER", "-c"  } , query_command)
+			query_command = vim.tbl_extend("keep", { "su", "-", "$SUDO_USER", "-c" }, query_command)
 		end
 	end
 
