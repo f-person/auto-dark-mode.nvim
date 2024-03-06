@@ -46,8 +46,9 @@ options – `set_dark_mode` function, `set_light_mode` function, and
 change the background option, but you can do whatever you like.
 
 `update_interval` is how frequently the system appearance is checked. The value
-is stored in milliseconds. Defaults to `3000`.
-
+is stored in milliseconds. Take care to choose a value, that is larger than
+the time needed to query the system appearance. A value lower than that might
+cause Neovim to freeze. Defaults to `3000`.
 >lua
     local auto_dark_mode = require('auto-dark-mode')
     
