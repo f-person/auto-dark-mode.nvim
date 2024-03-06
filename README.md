@@ -76,6 +76,9 @@ auto_dark_mode.setup({
 return {
   "f-person/auto-dark-mode.nvim",
   config = {
+    -- This value needs to be larger than whatever
+    -- time your system takes to query dark mode.
+    -- Otherwise you risk freezing neovim on shutdown.
     update_interval = 1000,
     set_dark_mode = function()
       vim.api.nvim_set_option("background", "dark")
