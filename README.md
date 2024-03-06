@@ -52,7 +52,10 @@ You need to call `setup` for initialization.
 By default, they just change the background option, but you can do whatever you like.
 
 `update_interval` is how frequently the system appearance is checked.
-The value is stored in milliseconds. Defaults to `3000`.
+The value needs to be larger than whatever time your system takes to query dark mode.
+Otherwise you risk freezing neovim on shutdown.
+The value is stored in milliseconds.
+Defaults to `3000`.
 
 ```lua
 local auto_dark_mode = require('auto-dark-mode')
