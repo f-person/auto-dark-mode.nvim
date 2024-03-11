@@ -85,14 +85,17 @@ local function init()
 	  ]])
 		end
 
-		query_command = vim.tbl_extend("keep", {
-			"dbus-send --session --print-reply=literal --reply-timeout=1000",
+		query_command = {
+			"dbus-send",
+			"--session",
+			"--print-reply=literal",
+			"--reply-timeout=1000",
 			"--dest=org.freedesktop.portal.Desktop",
 			"/org/freedesktop/portal/desktop",
 			"org.freedesktop.portal.Settings.Read",
 			"string:'org.freedesktop.appearance'",
 			"string:'color-scheme'",
-		})
+		}
 	elseif system == "Windows_NT" or system == "WSL" then
 		-- Don't swap the quotes; it breaks the code
 		query_command = {
