@@ -111,7 +111,8 @@ local function init()
 
 	if vim.fn.has("unix") ~= 0 then
 		if vim.loop.getuid() == 0 then
-			query_command = vim.tbl_extend("keep", { "su", "-", "$SUDO_USER", "-c" }, query_command)
+			local sudo_user = vim.env.SUDO_USER
+			query_command = vim.tbl_extend("keep", { "su", "-", sudo_user, "-c" }, query_command)
 		end
 	end
 
