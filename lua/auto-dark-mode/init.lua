@@ -93,8 +93,8 @@ local function init()
 			"--dest=org.freedesktop.portal.Desktop",
 			"/org/freedesktop/portal/desktop",
 			"org.freedesktop.portal.Settings.Read",
-			"string:'org.freedesktop.appearance'",
-			"string:'color-scheme'",
+			"string:org.freedesktop.appearance",
+			"string:color-scheme",
 		}
 	elseif system == "Windows_NT" or system == "WSL" then
 		-- Don't swap the quotes; it breaks the code
