@@ -18,6 +18,9 @@ local query_command
 ---@type "Linux" | "Darwin" | "Windows_NT" | "WSL"
 local system
 
+---@type "light" | "dark"
+local default_theme;
+
 -- Parses the query response for each system
 ---@param res string
 ---@return boolean
@@ -27,7 +30,13 @@ local function parse_query_response(res)
 		-- 0: no preference
 		-- 1: dark
 		-- 2: light
-		return string.match(res, "uint32 1") ~= nil
+		if string.match(res, "uint32 1") ~= nil then
+			return true
+		elseif string.match(res, "unit32 2") ~= nil then
+			return false
+		else
+			return default_theme == "dark"
+		end
 	elseif system == "Darwin" then
 		return res == "Dark"
 	elseif system == "Windows_NT" or system == "WSL" then
@@ -149,6 +158,7 @@ local function setup(options)
 		set_background("light")
 	end
 	update_interval = options.update_interval or 3000
+	default_theme = options.default or "dark"
 
 	init()
 end
