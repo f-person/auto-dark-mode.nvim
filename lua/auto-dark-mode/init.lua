@@ -19,7 +19,7 @@ local query_command
 local system
 
 ---@type "light" | "dark"
-local default_theme;
+local fallback;
 
 -- Parses the query response for each system
 ---@param res string
@@ -35,7 +35,7 @@ local function parse_query_response(res)
 		elseif string.match(res, "unit32 2") ~= nil then
 			return false
 		else
-			return default_theme == "dark"
+			return fallback == "dark"
 		end
 	elseif system == "Darwin" then
 		return res == "Dark"
@@ -158,7 +158,7 @@ local function setup(options)
 		set_background("light")
 	end
 	update_interval = options.update_interval or 3000
-	default_theme = options.default or "dark"
+	fallback = options.fallback or "dark"
 
 	init()
 end
