@@ -19,7 +19,7 @@ local query_command
 local system
 
 ---@type "light" | "dark"
-local fallback;
+local fallback
 
 -- Parses the query response for each system
 ---@param res string
@@ -32,7 +32,7 @@ local function parse_query_response(res)
 		-- 2: light
 		if string.match(res, "uint32 1") ~= nil then
 			return true
-		elseif string.match(res, "unit32 2") ~= nil then
+		elseif string.match(res, "uint32 2") ~= nil then
 			return false
 		else
 			return fallback == "dark"
