@@ -5,6 +5,6 @@
 ---@field set_light_mode nil | fun(): nil
 -- Every `update_interval` milliseconds a theme check will be performed.
 ---@field update_interval number?
--- Optional. Fallback theme to use if the system theme can't be detected. 
+-- Optional. Fallback theme to use if the system theme can't be detected.
 -- Useful for linux and environments without a desktop manager.
 ---@field fallback "light" | "dark" | nil

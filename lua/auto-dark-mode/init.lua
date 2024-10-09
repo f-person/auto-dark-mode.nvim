@@ -19,7 +19,7 @@ local query_command
 local system
 
 ---@type "light" | "dark"
-local fallback;
+local fallback
 
 -- Parses the query response for each system
 ---@param res string
