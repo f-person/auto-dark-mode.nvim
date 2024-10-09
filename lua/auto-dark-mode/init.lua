@@ -121,7 +121,17 @@ local function init()
 	if vim.fn.has("unix") ~= 0 then
 		if vim.loop.getuid() == 0 then
 			local sudo_user = vim.env.SUDO_USER
-			query_command = vim.tbl_extend("keep", { "su", "-", sudo_user, "-c" }, query_command)
+
+			if sudo_user ~= nil then
+				query_command = vim.tbl_extend("keep", { "su", "-", sudo_user, "-c" }, query_command)
+			else
+				error([[
+          auto-dark-mode.nvim:
+
+          Running as `root`, but `$SUDO_USER` is not set.
+          Please open an issue to add support for your system.
+        ]])
+			end
 		end
 	end
 
