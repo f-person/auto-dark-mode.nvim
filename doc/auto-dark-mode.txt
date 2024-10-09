@@ -4,9 +4,10 @@
 Table of Contents                           *auto-dark-mode-table-of-contents*
 
 1. auto-dark-mode.nvim                    |auto-dark-mode-auto-dark-mode.nvim|
-  - Installation             |auto-dark-mode-auto-dark-mode.nvim-installation|
-  - Requirements             |auto-dark-mode-auto-dark-mode.nvim-requirements|
-  - Configuration           |auto-dark-mode-auto-dark-mode.nvim-configuration|
+  - 📋 Requirements   |auto-dark-mode-auto-dark-mode.nvim-📋-requirements|
+  - 📦 Installation   |auto-dark-mode-auto-dark-mode.nvim-📦-installation|
+  - ⚙️ Configuration|auto-dark-mode-auto-dark-mode.nvim-⚙️-configuration|
+  - 🚀 Usage                 |auto-dark-mode-auto-dark-mode.nvim-🚀-usage|
   - Thanks To                   |auto-dark-mode-auto-dark-mode.nvim-thanks-to|
 2. Support                                            |auto-dark-mode-support|
 3. Links                                                |auto-dark-mode-links|
@@ -18,77 +19,82 @@ A Neovim plugin for macOS, Linux, and Windows that automatically changes the
 editor appearance based on system settings.
 
 
-INSTALLATION                 *auto-dark-mode-auto-dark-mode.nvim-installation*
+📋 REQUIREMENTS       *auto-dark-mode-auto-dark-mode.nvim-📋-requirements*
+
+Your operating system needs to be:
+
+- a Linux desktop environment that implements
+    `org.freedesktop.appearance.color-scheme` <https://github.com/flatpak/xdg-desktop-portal/issues/629>,
+    such as
+    - Gnome <https://gnome.org>
+    - KDE <https://kde.org>
+    - darkman <https://gitlab.com/WhyNotHugo/darkman> for window managers
+- macOS Mojave or newer
+- Windows 10 or newer (or WSL)
 
 
-USING VIM-PLUG ~
+📦 INSTALLATION       *auto-dark-mode-auto-dark-mode.nvim-📦-installation*
+
+Install the plugin with your preferred package manager:
+
+
+LAZY.NVIM ~
+
+>lua
+    -- Lua
+    {
+      "f-person/auto-dark-mode.nvim",
+      opts = {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      }
+    }
+<
+
+
+VIM-PLUG ~
 
 >vim
     Plug 'f-person/auto-dark-mode.nvim'
 <
 
 
-REQUIREMENTS                 *auto-dark-mode-auto-dark-mode.nvim-requirements*
+⚙️ CONFIGURATION *auto-dark-mode-auto-dark-mode.nvim-⚙️-configuration*
 
-- macOS, a Linux environment that implements
-    `org.freedesktop.appearance.color-scheme` <https://github.com/flatpak/xdg-desktop-portal/issues/629>,
-    Windows 10+ or WSL
-- Neovim
-
-
-CONFIGURATION               *auto-dark-mode-auto-dark-mode.nvim-configuration*
-
-You need to call `setup` for initialization. `setup` accepts a table with
-options – `set_dark_mode` function, `set_light_mode` function, and
-`update_interval` integer.
-
-`set_dark_mode` is called when the system appearance changes to dark mode, and
-`set_light_mode` is called when it changes to light mode. By default, they just
-change the background option, but you can do whatever you like.
-
-`update_interval` is how frequently the system appearance is checked. The value
-needs to be larger than whatever time your system takes to query dark mode.
-Otherwise you risk freezing neovim on shutdown. The value is stored in
-milliseconds. Defaults to `3000`.
+**auto-dark-mode** comes with the following defaults:
 
 >lua
-    local auto_dark_mode = require('auto-dark-mode')
-    
-    auto_dark_mode.setup({
-        update_interval = 1000,
+    {
         set_dark_mode = function()
-            vim.api.nvim_set_option_value('background', 'dark', {})
-            vim.cmd('colorscheme gruvbox')
+            vim.api.nvim_set_option_value("background", "dark", {})
         end,
         set_light_mode = function()
-            vim.api.nvim_set_option_value('background', 'light', {})
-            vim.cmd('colorscheme gruvbox')
+            vim.api.nvim_set_option_value("background", "light", {})
         end,
-    })
-<
-
-
-USING LAZY ~
-
->lua
-    return {
-      "f-person/auto-dark-mode.nvim",
-      opts = {
-        update_interval = 1000,
-        set_dark_mode = function()
-          vim.api.nvim_set_option_value("background", "dark", {})
-          vim.cmd("colorscheme gruvbox")
-        end,
-        set_light_mode = function()
-          vim.api.nvim_set_option_value("background", "light", {})
-          vim.cmd("colorscheme gruvbox")
-        end,
-      },
+        update_interval = 3000,
+        fallback = "dark"
     }
 <
 
+`set_dark_mode` and `set_light_mode` are the hooks called when the system
+appearance changes. By default, they change the |background| option, overriding
+the function allows for further customization.
 
-DISABLE
+`update_interval` is how frequently the system appearance is checked, in
+milliseconds. The value needs to be higher than the amount of milliseconds it
+takes to query your system for the dark mode state. Otherwise, you risk
+freezing neovim on shutdown.
+
+`fallback` specifies the theme to use when the auto-detection fails. This can
+be particularly useful to specify a default version when remotely connecting
+via SSH, or when using neovim on a tty.
+
+
+🚀 USAGE                     *auto-dark-mode-auto-dark-mode.nvim-🚀-usage*
+
+
+DISABLING AT RUNTIME ~
 
 You can disable `auto-dark-mode.nvim` at runtime via `lua
 require('auto-dark-mode').disable()`.
