@@ -40,8 +40,8 @@ local function parse_query_response(res)
 	elseif system == "Darwin" then
 		return res[1] == "Dark"
 	elseif system == "Windows_NT" or system == "WSL" then
-		-- AppsUseLightTheme    REG_DWORD    0x0 : dark
-		-- AppsUseLightTheme    REG_DWORD    0x1 : light
+		-- AppsUseLightTheme REG_DWORD 0x0 : dark
+		-- AppsUseLightTheme REG_DWORD 0x1 : light
 		return string.match(res[3], "0x1") == nil
 	end
 	return false
@@ -91,7 +91,7 @@ local function init()
 			error([[
 		`dbus-send` is not available. The Linux implementation of
 		auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
-	  ]])
+		]])
 		end
 
 		query_command = {
@@ -126,11 +126,11 @@ local function init()
 				query_command = vim.tbl_extend("keep", { "su", "-", sudo_user, "-c" }, query_command)
 			else
 				error([[
-          auto-dark-mode.nvim:
+        auto-dark-mode.nvim:
 
-          Running as `root`, but `$SUDO_USER` is not set.
-          Please open an issue to add support for your system.
-        ]])
+        Running as `root`, but `$SUDO_USER` is not set.
+        Please open an issue to add support for your system.
+				]])
 			end
 		end
 	end
