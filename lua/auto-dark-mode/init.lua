@@ -126,10 +126,9 @@ local function init()
 				query_command = vim.tbl_extend("keep", { "su", "-", sudo_user, "-c" }, query_command)
 			else
 				error([[
-        auto-dark-mode.nvim:
-
-        Running as `root`, but `$SUDO_USER` is not set.
-        Please open an issue to add support for your system.
+				auto-dark-mode.nvim:
+				Running as `root`, but `$SUDO_USER` is not set.
+				Please open an issue to add support for your system.
 				]])
 			end
 		end
