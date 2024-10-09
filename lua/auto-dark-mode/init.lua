@@ -13,7 +13,7 @@ local set_light_mode
 ---@type number
 local update_interval
 
----@type string
+---@type table
 local query_command
 ---@type "Linux" | "Darwin" | "Windows_NT" | "WSL"
 local system
@@ -22,7 +22,7 @@ local system
 local fallback
 
 -- Parses the query response for each system
----@param res string
+---@param res table
 ---@return boolean
 local function parse_query_response(res)
 	if system == "Linux" then
@@ -30,19 +30,19 @@ local function parse_query_response(res)
 		-- 0: no preference
 		-- 1: dark
 		-- 2: light
-		if string.match(res, "uint32 1") ~= nil then
+		if string.match(res[1], "uint32 1") ~= nil then
 			return true
-		elseif string.match(res, "uint32 2") ~= nil then
+		elseif string.match(res[1], "uint32 2") ~= nil then
 			return false
 		else
 			return fallback == "dark"
 		end
 	elseif system == "Darwin" then
-		return res == "Dark"
+		return res[1] == "Dark"
 	elseif system == "Windows_NT" or system == "WSL" then
-		-- AppsUseLightTheme    REG_DWORD    0x0 : dark
-		-- AppsUseLightTheme    REG_DWORD    0x1 : light
-		return string.match(res, "1") == nil
+		-- AppsUseLightTheme REG_DWORD 0x0 : dark
+		-- AppsUseLightTheme REG_DWORD 0x1 : light
+		return string.match(res[3], "0x1") == nil
 	end
 	return false
 end
@@ -51,8 +51,7 @@ end
 local function check_is_dark_mode(callback)
 	utils.start_job(query_command, {
 		on_stdout = function(data)
-			-- we only care about the first line of the response
-			local is_dark_mode = parse_query_response(data[1])
+			local is_dark_mode = parse_query_response(data)
 			callback(is_dark_mode)
 		end,
 	})
@@ -86,34 +85,52 @@ local function init()
 	end
 
 	if system == "Darwin" then
-		query_command = "defaults read -g AppleInterfaceStyle"
+		query_command = { "defaults", "read", "-g", "AppleInterfaceStyle" }
 	elseif system == "Linux" then
 		if not vim.fn.executable("dbus-send") then
 			error([[
 		`dbus-send` is not available. The Linux implementation of
 		auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
-	  ]])
+		]])
 		end
 
-		query_command = table.concat({
-			"dbus-send --session --print-reply=literal --reply-timeout=1000",
+		query_command = {
+			"dbus-send",
+			"--session",
+			"--print-reply=literal",
+			"--reply-timeout=1000",
 			"--dest=org.freedesktop.portal.Desktop",
 			"/org/freedesktop/portal/desktop",
 			"org.freedesktop.portal.Settings.Read",
-			"string:'org.freedesktop.appearance'",
-			"string:'color-scheme'",
-		}, " ")
+			"string:org.freedesktop.appearance",
+			"string:color-scheme",
+		}
 	elseif system == "Windows_NT" or system == "WSL" then
 		-- Don't swap the quotes; it breaks the code
-		query_command =
-			'reg.exe Query "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme | findstr.exe "AppsUseLightTheme"'
+		query_command = {
+			"reg.exe",
+			"Query",
+			"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+			"/v",
+			"AppsUseLightTheme",
+		}
 	else
 		return
 	end
 
 	if vim.fn.has("unix") ~= 0 then
 		if vim.loop.getuid() == 0 then
-			query_command = "su - $SUDO_USER -c " .. query_command
+			local sudo_user = vim.env.SUDO_USER
+
+			if sudo_user ~= nil then
+				query_command = vim.tbl_extend("keep", { "su", "-", sudo_user, "-c" }, query_command)
+			else
+				error([[
+				auto-dark-mode.nvim:
+				Running as `root`, but `$SUDO_USER` is not set.
+				Please open an issue to add support for your system.
+				]])
+			end
 		end
 	end
 
