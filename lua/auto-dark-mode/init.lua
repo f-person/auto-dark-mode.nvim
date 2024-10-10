@@ -67,12 +67,10 @@ M.init = function()
 	if M.state.system == "Darwin" then
 		M.state.query_command = { "defaults", "read", "-g", "AppleInterfaceStyle" }
 	elseif M.state.system == "Linux" then
-		if not vim.fn.executable("dbus-send") then
-			error([[
-        auto-dark-mode.nvim:
-        `dbus-send` is not available. The Linux implementation of
-        auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
-			]])
+		if vim.fn.executable("dbus-send") == 0 then
+			error(
+				"auto-dark-mode.nvim: `dbus-send` is not available. The Linux implementation of auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`."
+			)
 		end
 
 		M.state.query_command = {
@@ -92,18 +90,16 @@ M.init = function()
 		-- on WSL, if `reg.exe` cannot be found on the `$PATH`
 		-- (see interop.appendWindowsPath https://learn.microsoft.com/en-us/windows/wsl/wsl-config),
 		-- assume that it's in the default location
-		if M.state.system == "WSL" and not vim.fn.executable("reg.exe") then
+		if M.state.system == "WSL" and vim.fn.executable("reg.exe") == 0 then
 			local assumed_path = "/mnt/c/Windows/system32/reg.exe"
 
-			if vim.fn.filereadable(assumed_path) then
+			if vim.fn.filereadable(assumed_path) == 1 then
 				reg = assumed_path
 			else
 				-- `reg.exe` isn't on `$PATH` or in the default location, so throw an error
-				error([[
-          auto-dark-mode.nvim:
-          `reg.exe` is not available. To support syncing with the host system,
-          this plugin relies on `reg.exe` being on the `$PATH`.
-        ]])
+				error(
+					"auto-dark-mode.nvim: `reg.exe` is not available. To support syncing with the host system, this plugin relies on `reg.exe` being on the `$PATH`."
+				)
 			end
 		end
 
@@ -130,11 +126,9 @@ M.init = function()
 			end
 			M.state.query_command = extra_args
 		else
-			error([[
-				auto-dark-mode.nvim:
-				Running as `root`, but `$SUDO_USER` is not set.
-				Please open an issue to add support for your system.
-      ]])
+			error(
+				"auto-dark-mode.nvim: Running as `root`, but `$SUDO_USER` is not set. Please open an issue to add support for your system."
+			)
 		end
 	end
 
