@@ -7,6 +7,8 @@ local M = {
 	currently_in_dark_mode = nil,
 }
 
+local uv = vim.uv or vim.loop
+
 -- Parses the query response for each system, returning `true` if the system is
 -- in Dark mode, `false` when in Light mode.
 ---@param res string
@@ -35,8 +37,10 @@ local function parse_query_response(res)
 	return false
 end
 
+-- Executes the `set_dark_mode` and `set_light_mode` hooks when needed,
+-- otherwise it's a no-op.
 ---@param is_dark_mode boolean
-local function change_theme_if_needed(is_dark_mode)
+local function sync_theme(is_dark_mode)
 	if is_dark_mode == M.currently_in_dark_mode then
 		return
 	end
@@ -57,11 +61,17 @@ local function change_theme_if_needed(is_dark_mode)
 	end
 end
 
-M.poll_dark_mode = function()
+---@param callback? fun(is_dark_mode: boolean): nil
+M.poll_dark_mode = function(callback)
+	-- if no callback is provided, use a no-op
+	if callback == nil then
+		callback = function() end
+	end
+
 	if vim.system then
 		vim.system(M.state.query_command, { text = true }, function(data)
 			local is_dark_mode = parse_query_response(data.stdout)
-			change_theme_if_needed(is_dark_mode)
+			callback(is_dark_mode)
 		end)
 	else
 		-- Legacy implementation using `vim.fn.jobstart` instead of `vim.system`,
@@ -70,7 +80,7 @@ M.poll_dark_mode = function()
 			stdout_buffered = true,
 			on_stdout = function(_, data, _)
 				local is_dark_mode = parse_query_response(table.concat(data, "\n"))
-				change_theme_if_needed(is_dark_mode)
+				callback(is_dark_mode)
 			end,
 		})
 	end
@@ -80,17 +90,22 @@ M.start_timer = function()
 	---@type number
 	local interval = M.options.update_interval
 
-	if vim.uv.new_timer or vim.loop.new_timer then
-		M.timer = vim.uv.new_timer() or vim.loop.new_timer()
-		M.timer:start(interval, interval, M.poll_dark_mode)
+	local timer_callback = function()
+		M.poll_dark_mode(sync_theme)
+	end
+
+	-- needs to check for `vim.system` because the poll function depends on it
+	if uv and vim.system then
+		M.timer = uv.new_timer()
+		M.timer:start(interval, interval, timer_callback)
 	else
-		M.timer_id = vim.fn.timer_start(interval, M.poll_dark_mode, { ["repeat"] = -1 })
+		M.timer_id = vim.fn.timer_start(interval, timer_callback, { ["repeat"] = -1 })
 	end
 end
 
 M.stop_timer = function()
-	if vim.uv.timer_stop or vim.loop.timer_stop then
-		vim.uv.timer_stop(M.timer)
+	if uv.timer_stop then
+		uv.timer_stop(M.timer)
 	else
 		vim.fn.timer_stop(M.timer_id)
 	end
@@ -102,7 +117,7 @@ M.start = function(options, state)
 	M.options = options
 	M.state = state
 
-	M.poll_dark_mode()
+	M.poll_dark_mode(sync_theme)
 	M.start_timer()
 end
 

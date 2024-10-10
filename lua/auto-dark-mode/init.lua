@@ -1,10 +1,17 @@
 local M = {}
 
+local uv = vim.uv or vim.loop
+
 ---@alias Appearance "light" | "dark"
 ---@alias DetectedOS "Linux" | "Darwin" | "Windows_NT" | "WSL"
 
 ---@class AutoDarkModeOptions
 local default_options = {
+	-- Optional. Fallback theme to use if the system theme can't be detected.
+	-- Useful for linux and environments without a desktop manager.
+	---@type Appearance?
+	fallback = "dark",
+
 	-- Optional. If not provided, `vim.api.nvim_set_option_value('background', 'dark', {})` will be used.
 	---@type fun(): nil | nil
 	set_dark_mode = function()
@@ -17,21 +24,13 @@ local default_options = {
 		vim.api.nvim_set_option_value("background", "light", {})
 	end,
 
-	-- Every `update_interval` milliseconds a theme check will be performed.
+	-- Optional. Specifies the `update_interval` milliseconds a theme check will be performed.
 	---@type number?
 	update_interval = 3000,
-
-	-- Optional. Fallback theme to use if the system theme can't be detected.
-	-- Useful for linux and environments without a desktop manager.
-	---@type Appearance
-	fallback = "dark",
 }
 
 local function validate_options(options)
 	vim.validate({
-		set_dark_mode = { options.set_dark_mode, "function" },
-		set_light_mode = { options.set_light_mode, "function" },
-		update_interval = { options.update_interval, "number" },
 		fallback = {
 			options.fallback,
 			function(opt)
@@ -39,6 +38,9 @@ local function validate_options(options)
 			end,
 			"`fallback` must be either 'light' or 'dark'",
 		},
+		set_dark_mode = { options.set_dark_mode, "function" },
+		set_light_mode = { options.set_light_mode, "function" },
+		update_interval = { options.update_interval, "number" },
 	})
 	M.state.setup_correct = true
 end
@@ -53,21 +55,11 @@ M.state = {
 	query_command = {},
 }
 
--- map the vim.loop functions to vim.uv if available
-local getuid = vim.uv.getuid or vim.loop.getuid
-
 M.init = function()
-	local os_uname = vim.uv.os_uname() or vim.loop.os_uname()
+	local os_uname = uv.os_uname()
 
 	if string.match(os_uname.release, "WSL") then
 		M.state.system = "WSL"
-		if not vim.fn.executable("reg.exe") then
-			error([[
-			auto-dark-mode.nvim:
-			`reg.exe` is not available. To support syncing with the host system,
-			this plugin relies on `reg.exe` being on the `$PATH`.
-			]])
-		end
 	else
 		M.state.system = os_uname.sysname
 	end
@@ -77,9 +69,9 @@ M.init = function()
 	elseif M.state.system == "Linux" then
 		if not vim.fn.executable("dbus-send") then
 			error([[
-			auto-dark-mode.nvim:
-			`dbus-send` is not available. The Linux implementation of
-			auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
+        auto-dark-mode.nvim:
+        `dbus-send` is not available. The Linux implementation of
+        auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
 			]])
 		end
 
@@ -95,8 +87,28 @@ M.init = function()
 			"string:color-scheme",
 		}
 	elseif M.state.system == "Windows_NT" or M.state.system == "WSL" then
+		local reg = "reg.exe"
+
+		-- on WSL, if `reg.exe` cannot be found on the `$PATH`
+		-- (see interop.appendWindowsPath https://learn.microsoft.com/en-us/windows/wsl/wsl-config),
+		-- assume that it's in the default location
+		if M.state.system == "WSL" and not vim.fn.executable("reg.exe") then
+			local assumed_path = "/mnt/c/Windows/system32/reg.exe"
+
+			if vim.fn.filereadable(assumed_path) then
+				reg = assumed_path
+			else
+				-- `reg.exe` isn't on `$PATH` or in the default location, so throw an error
+				error([[
+          auto-dark-mode.nvim:
+          `reg.exe` is not available. To support syncing with the host system,
+          this plugin relies on `reg.exe` being on the `$PATH`.
+        ]])
+			end
+		end
+
 		M.state.query_command = {
-			"reg.exe",
+			reg,
 			"Query",
 			"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
 			"/v",
@@ -107,7 +119,7 @@ M.init = function()
 	end
 
 	-- when on a supported unix system, and the userid is root
-	if (M.state.system == "Darwin" or M.state.system == "Linux") and getuid() == 0 then
+	if (M.state.system == "Darwin" or M.state.system == "Linux") and uv.getuid() == 0 then
 		local sudo_user = vim.env.SUDO_USER
 
 		if sudo_user ~= nil then
@@ -122,7 +134,7 @@ M.init = function()
 				auto-dark-mode.nvim:
 				Running as `root`, but `$SUDO_USER` is not set.
 				Please open an issue to add support for your system.
-				]])
+      ]])
 		end
 	end
 
