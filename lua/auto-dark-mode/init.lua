@@ -108,7 +108,7 @@ local function init()
 	elseif system == "Windows_NT" or system == "WSL" then
 		-- Don't swap the quotes; it breaks the code
 		query_command = {
-			"reg.exe",
+			"/mnt/c/Windows/System32/reg.exe",
 			"Query",
 			"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
 			"/v",
