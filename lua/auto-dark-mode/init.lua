@@ -105,7 +105,16 @@ local function init()
 			"string:org.freedesktop.appearance",
 			"string:color-scheme",
 		}
-	elseif system == "Windows_NT" or system == "WSL" then
+	elseif system == "WSL" then
+		-- Don't swap the quotes; it breaks the code
+		query_command = {
+			"c:\\Windows\\System32\\reg.exe",
+			"Query",
+			"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+			"/v",
+			"AppsUseLightTheme",
+		}
+  elseif system == "Windows_NT" then
 		-- Don't swap the quotes; it breaks the code
 		query_command = {
 			"reg.exe",
@@ -114,6 +123,7 @@ local function init()
 			"/v",
 			"AppsUseLightTheme",
 		}
+
 	else
 		return
 	end
