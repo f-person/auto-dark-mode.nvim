@@ -1,4 +1,5 @@
 # auto-dark-mode.nvim
+
 A Neovim plugin for macOS, Linux, and Windows that automatically changes the
 editor appearance based on system settings.
 
@@ -28,78 +29,82 @@ editor appearance based on system settings.
 
 <!-- panvimdoc-ignore-end -->
 
-## Installation
+## 📋 Requirements
+Your operating system needs to be:
 
-### Using [vim-plug](https://github.com/junegunn/vim-plug)
+- a Linux desktop environment that implements
+  [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629),
+  such as
+  - [Gnome](https://gnome.org)
+  - [KDE](https://kde.org)
+  - [darkman](https://gitlab.com/WhyNotHugo/darkman) for window managers
+- macOS Mojave or newer
+- Windows 10 or newer (or WSL)
+
+## 📦 Installation
+
+Install the plugin with your preferred package manager:
+
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+```lua
+-- Lua
+{
+  "f-person/auto-dark-mode.nvim",
+  opts = {
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+  }
+}
+```
+
+### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
 Plug 'f-person/auto-dark-mode.nvim'
 ```
 
-## Requirements
-* macOS, a Linux environment that implements
-  [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629),
-  Windows 10+ or WSL
-* Neovim
+## ⚙️ Configuration
 
-## Configuration
-You need to call `setup` for initialization.
-`setup` accepts a table with options – `set_dark_mode` function,
-`set_light_mode` function, and `update_interval` integer.
-
-`set_dark_mode` is called when the system appearance changes to dark mode, and
-`set_light_mode` is called when it changes to light mode.
-By default, they just change the background option, but you can do whatever you like.
-
-`update_interval` is how frequently the system appearance is checked.
-The value needs to be larger than whatever time your system takes to query dark mode.
-Otherwise you risk freezing neovim on shutdown.
-The value is stored in milliseconds.
-Defaults to `3000`.
+**auto-dark-mode** comes with the following defaults:
 
 ```lua
-local auto_dark_mode = require('auto-dark-mode')
-
-auto_dark_mode.setup({
-	update_interval = 1000,
-	set_dark_mode = function()
-		vim.api.nvim_set_option_value('background', 'dark', {})
-		vim.cmd('colorscheme gruvbox')
-	end,
-	set_light_mode = function()
-		vim.api.nvim_set_option_value('background', 'light', {})
-		vim.cmd('colorscheme gruvbox')
-	end,
-})
-```
-
-### Using [lazy](https://github.com/folke/lazy.nvim)
-
-```lua
-return {
-  "f-person/auto-dark-mode.nvim",
-  opts = {
-    update_interval = 1000,
+{
     set_dark_mode = function()
-      vim.api.nvim_set_option_value("background", "dark", {})
-      vim.cmd("colorscheme gruvbox")
+        vim.api.nvim_set_option_value("background", "dark", {})
     end,
     set_light_mode = function()
-      vim.api.nvim_set_option_value("background", "light", {})
-      vim.cmd("colorscheme gruvbox")
+        vim.api.nvim_set_option_value("background", "light", {})
     end,
-  },
+    update_interval = 3000,
+    fallback = "dark"
 }
 ```
 
-#### Disable
+`set_dark_mode` and `set_light_mode` are the hooks called when the system
+appearance changes. By default, they change the
+[background](https://neovim.io/doc/user/options.html#'background') option,
+overriding the function allows for further customization.
+
+`update_interval` is how frequently the system appearance is checked, in
+milliseconds. The value needs to be higher than the amount of milliseconds it
+takes to query your system for the dark mode state. Otherwise, you risk
+freezing neovim on shutdown.
+
+`fallback` specifies the theme to use when the auto-detection fails. This can
+be particularly useful to specify a default version when remotely connecting
+via SSH, or when using neovim on a tty.
+
+## 🚀 Usage
+
+### Disabling at runtime
+
 You can disable `auto-dark-mode.nvim` at runtime via `lua require('auto-dark-mode').disable()`.
 
-## Thanks To
-* [@nekowinston](https://github.com/nekowinston) for implementing Linux support and other contributions! <3
-* [@adityamwagh](https://github.com/adityamwagh) for implementing Windows support
+## 💖 Contributors
+[![](https://contrib.rocks/image?repo=f-person/auto-dark-mode.nvim)](https://github.com/f-person/auto-dark-mode.nvim/graphs/contributors)
 
-# Support
-If you enjoy the plugin and want to support what I do
 
-<a href="https://www.buymeacoffee.com/fperson" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41"  width="174"></a>
+👩‍🎤 Special thanks to [@nekowinston](https://github.com/nekowinston) for 
+maintaining the plugin 👩‍🎤
