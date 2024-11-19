@@ -102,11 +102,9 @@ via SSH, or when using neovim on a tty.
 
 You can disable `auto-dark-mode.nvim` at runtime via `lua require('auto-dark-mode').disable()`.
 
-## Thanks To
-* [@nekowinston](https://github.com/nekowinston) for implementing Linux support and other contributions! <3
-* [@adityamwagh](https://github.com/adityamwagh) for implementing Windows support
+## 💖 Contributors
+[![](https://contrib.rocks/image?repo=f-person/auto-dark-mode.nvim)](https://github.com/f-person/auto-dark-mode.nvim/graphs/contributors)
 
-# Support
-If you enjoy the plugin and want to support what I do
 
-<a href="https://www.buymeacoffee.com/fperson" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41"  width="174"></a>
+👩‍🎤 Special thanks to [@nekowinston](https://github.com/nekowinston) for 
+maintaining the plugin 👩‍🎤
