@@ -13,6 +13,9 @@ local set_light_mode
 ---@type number
 local update_interval
 
+---@type boolean
+local transparent_dark_background
+
 ---@type table
 local query_command
 ---@type "Linux" | "Darwin" | "Windows_NT" | "WSL"
@@ -47,6 +50,13 @@ local function parse_query_response(res)
 	return false
 end
 
+local function set_transparent_dark_background()
+  vim.cmd([[highlight Normal guibg=none]])
+  vim.cmd([[highlight NonText guibg=none]])
+  vim.cmd([[highlight Normal ctermbg=none]])
+  vim.cmd([[highlight NonText ctermbg=none]])
+end
+
 ---@param callback fun(is_dark_mode: boolean)
 local function check_is_dark_mode(callback)
 	utils.start_job(query_command, {
@@ -66,6 +76,9 @@ local function change_theme_if_needed(is_dark_mode)
 	is_currently_dark_mode = is_dark_mode
 	if is_currently_dark_mode then
 		set_dark_mode()
+    if transparent_dark_background then
+      set_transparent_dark_background()
+    end
 	else
 		set_light_mode()
 	end
@@ -186,6 +199,7 @@ local function setup(options)
 	end
 	update_interval = options.update_interval or 3000
 	fallback = options.fallback or "dark"
+  transparent_dark_background = options.transparent_dark_background or false
 
 	init()
 end
