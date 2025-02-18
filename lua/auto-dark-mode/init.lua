@@ -95,7 +95,7 @@ local function init()
       if system == "Darwin" then
           query_command = { "defaults", "read", "-g", "AppleInterfaceStyle" }
       elseif system == "Linux" then
-          if vim.fn.executable("dbus-send") then
+          if not vim.fn.executable("dbus-send") then
               error([[
           `dbus-send` is not available. The Linux implementation of
           auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
