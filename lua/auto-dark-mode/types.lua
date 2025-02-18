@@ -8,3 +8,7 @@
 -- Optional. Fallback theme to use if the system theme can't be detected.
 -- Useful for linux and environments without a desktop manager.
 ---@field fallback "light" | "dark" | nil
+-- Optional. If provided, will override the query command used to determine the theme preference
+---@field query_command table | nil
+-- Optional. If provided, will be used to match against the provided query_command. Required if query_command is not nil
+---@field dark_theme_match string | nil

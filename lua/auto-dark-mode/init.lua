@@ -13,6 +13,8 @@ local set_light_mode
 ---@type number
 local update_interval
 
+---@type string
+local dark_theme_match
 ---@type table
 local query_command
 ---@type "Linux" | "Darwin" | "Windows_NT" | "WSL"
@@ -25,6 +27,11 @@ local fallback
 ---@param res table
 ---@return boolean
 local function parse_query_response(res)
+
+    if dark_theme_match then
+      return res[1] == dark_theme_match
+    end
+
 	if system == "Linux" then
 		-- https://github.com/flatpak/xdg-desktop-portal/blob/c0f0eb103effdcf3701a1bf53f12fe953fbf0b75/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
 		-- 0: no preference
@@ -84,49 +91,51 @@ local function init()
 		system = vim.loop.os_uname().sysname
 	end
 
-	if system == "Darwin" then
-		query_command = { "defaults", "read", "-g", "AppleInterfaceStyle" }
-	elseif system == "Linux" then
-		if not vim.fn.executable("dbus-send") then
-			error([[
-		`dbus-send` is not available. The Linux implementation of
-		auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
-		]])
-		end
+    if query_command == nil then
+      if system == "Darwin" then
+          query_command = { "defaults", "read", "-g", "AppleInterfaceStyle" }
+      elseif system == "Linux" then
+          if query_command == nil and vim.fn.executable("dbus-send") then
+              error([[
+          `dbus-send` is not available. The Linux implementation of
+          auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`.
+          ]])
+          end
 
-		query_command = {
-			"dbus-send",
-			"--session",
-			"--print-reply=literal",
-			"--reply-timeout=1000",
-			"--dest=org.freedesktop.portal.Desktop",
-			"/org/freedesktop/portal/desktop",
-			"org.freedesktop.portal.Settings.Read",
-			"string:org.freedesktop.appearance",
-			"string:color-scheme",
-		}
-	elseif system == "WSL" then
-		-- Don't swap the quotes; it breaks the code
-		query_command = {
-			"/mnt/c/Windows/system32/reg.exe",
-			"Query",
-			"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-			"/v",
-			"AppsUseLightTheme",
-		}
-  elseif system == "Windows_NT" then
-		-- Don't swap the quotes; it breaks the code
-		query_command = {
-			"reg.exe",
-			"Query",
-			"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-			"/v",
-			"AppsUseLightTheme",
-		}
+            query_command = {
+                "dbus-send",
+                "--session",
+                "--print-reply=literal",
+                "--reply-timeout=1000",
+                "--dest=org.freedesktop.portal.Desktop",
+                "/org/freedesktop/portal/desktop",
+                "org.freedesktop.portal.Settings.Read",
+                "string:org.freedesktop.appearance",
+                "string:color-scheme",
+            }
+      elseif system == "WSL" then
+          -- Don't swap the quotes; it breaks the code
+            query_command = {
+                "/mnt/c/Windows/system32/reg.exe",
+                "Query",
+                "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                "/v",
+                "AppsUseLightTheme",
+            }
+    elseif system == "Windows_NT" then
+            -- Don't swap the quotes; it breaks the code
+            query_command = {
+                "reg.exe",
+                "Query",
+                "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                "/v",
+                "AppsUseLightTheme",
+            }
 
-	else
-		return
-	end
+      else
+          return
+      end
+    end
 
 	if vim.fn.has("unix") ~= 0 then
 		if vim.loop.getuid() == 0 then
@@ -184,6 +193,17 @@ local function setup(options)
 	set_light_mode = options.set_light_mode or function()
 		set_background("light")
 	end
+
+    query_command = options.query_command
+    dark_theme_match = options.dark_theme_match
+
+    if dark_theme_match == nil and query_command ~= nil then
+      error([[
+      auto-dark-mode.nvim:
+      dark_theme_match must be set when providing custom query_command
+      ]])
+    end
+
 	update_interval = options.update_interval or 3000
 	fallback = options.fallback or "dark"
 
