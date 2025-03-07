@@ -11,27 +11,28 @@ local uv = vim.uv or vim.loop
 
 -- Parses the query response for each system, returning `true` if the system is
 -- in Dark mode, `false` when in Light mode.
----@param res string
+---@param stdout string
+---@param stderr string
 ---@return boolean
-local function parse_query_response(res)
+local function parse_query_response(stdout, stderr)
 	if M.state.system == "Linux" then
 		-- https://github.com/flatpak/xdg-desktop-portal/blob/c0f0eb103effdcf3701a1bf53f12fe953fbf0b75/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
 		-- 0: no preference
 		-- 1: dark
 		-- 2: light
-		if string.match(res, "uint32 1") ~= nil then
+		if string.match(stdout, "uint32 1") ~= nil then
 			return true
-		elseif string.match(res, "uint32 2") ~= nil then
+		elseif string.match(stdout, "uint32 2") ~= nil then
 			return false
 		else
 			return M.options.fallback == "dark"
 		end
 	elseif M.state.system == "Darwin" then
-		return res == "Dark\n"
+		return stdout == "Dark\n"
 	elseif M.state.system == "Windows_NT" or M.state.system == "WSL" then
 		-- AppsUseLightTheme REG_DWORD 0x0 : dark
 		-- AppsUseLightTheme REG_DWORD 0x1 : light
-		return string.match(res, "0x1") == nil
+		return string.match(stdout, "0x1") == nil
 	end
 
 	return false
@@ -61,7 +62,9 @@ local function sync_theme(is_dark_mode)
 	end
 end
 
----@param callback? fun(is_dark_mode: boolean): nil
+-- Uses a subprocess to query the system for the current dark mode setting.
+-- The callback is called with the plaintext stdout response of the query.
+---@param callback? fun(stdout: string, stderr: string): nil
 M.poll_dark_mode = function(callback)
 	-- if no callback is provided, use a no-op
 	if callback == nil then
@@ -70,20 +73,33 @@ M.poll_dark_mode = function(callback)
 
 	if vim.system then
 		vim.system(M.state.query_command, { text = true }, function(data)
-			local is_dark_mode = parse_query_response(data.stdout)
-			callback(is_dark_mode)
+			callback(data.stdout, data.stderr)
 		end)
 	else
 		-- Legacy implementation using `vim.fn.jobstart` instead of `vim.system`,
 		-- for use in neovim <0.10.0
+		local stdout = ""
+		local stderr = ""
+
 		vim.fn.jobstart(M.state.query_command, {
+			stderr_buffered = true,
 			stdout_buffered = true,
+			on_stderr = function(_, data, _)
+				stderr = data
+			end,
 			on_stdout = function(_, data, _)
-				local is_dark_mode = parse_query_response(table.concat(data, "\n"))
-				callback(is_dark_mode)
+				stdout = data
+			end,
+			on_exit = function(_, _, _)
+				callback(stdout, stderr)
 			end,
 		})
 	end
+end
+
+M.parse_callback = function(stdout, stderr)
+	local is_dark_mode = parse_query_response(stdout, stderr)
+	sync_theme(is_dark_mode)
 end
 
 M.start_timer = function()
@@ -91,7 +107,7 @@ M.start_timer = function()
 	local interval = M.options.update_interval
 
 	local timer_callback = function()
-		M.poll_dark_mode(sync_theme)
+		M.poll_dark_mode(M.parse_callback)
 	end
 
 	-- needs to check for `vim.system` because the poll function depends on it
@@ -117,7 +133,6 @@ M.start = function(options, state)
 	M.options = options
 	M.state = state
 
-	M.poll_dark_mode(sync_theme)
 	M.start_timer()
 end
 

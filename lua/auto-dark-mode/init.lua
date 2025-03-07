@@ -12,14 +12,22 @@ local default_options = {
 	---@type Appearance?
 	fallback = "dark",
 
-	-- Optional. If not provided, `vim.api.nvim_set_option_value('background', 'dark', {})` will be used.
-	---@type fun(): nil | nil
+	-- Optional. The default runs:
+	-- ```lua
+	-- vim.api.nvim_set_option_value('background', 'dark', {})
+	-- ```
+	---@type nil | fun(): nil
+	---@return nil
 	set_dark_mode = function()
 		vim.api.nvim_set_option_value("background", "dark", {})
 	end,
 
-	-- Optional. If not provided, `vim.api.nvim_set_option_value('background', 'light', {})` will be used.
-	---@type fun(): nil | nil
+	-- Optional. The default runs:
+	-- ```lua
+	-- vim.api.nvim_set_option_value('background', 'light', {})
+	-- ```
+	---@type nil | fun(): nil
+	---@return nil
 	set_light_mode = function()
 		vim.api.nvim_set_option_value("background", "light", {})
 	end,
@@ -29,19 +37,15 @@ local default_options = {
 	update_interval = 3000,
 }
 
+---@param options AutoDarkModeOptions
 local function validate_options(options)
-	vim.validate({
-		fallback = {
-			options.fallback,
-			function(opt)
-				return opt == "dark" or opt == "light"
-			end,
-			"`fallback` must be either 'light' or 'dark'",
-		},
-		set_dark_mode = { options.set_dark_mode, "function" },
-		set_light_mode = { options.set_light_mode, "function" },
-		update_interval = { options.update_interval, "number" },
-	})
+	vim.validate("fallback", options.fallback, function(opt)
+		return vim.tbl_contains({ "dark", "light" }, opt)
+	end, "`fallback` must be either 'light' or 'dark'")
+	vim.validate("set_dark_mode", options.set_dark_mode, "function")
+	vim.validate("set_light_mode", options.set_light_mode, "function")
+	vim.validate("update_interval", options.update_interval, "number")
+
 	M.state.setup_correct = true
 end
 
@@ -55,6 +59,7 @@ M.state = {
 	query_command = {},
 }
 
+---@return nil
 M.init = function()
 	local os_uname = uv.os_uname()
 
@@ -141,6 +146,7 @@ M.init = function()
 end
 
 ---@param options AutoDarkModeOptions
+---@return nil
 M.setup = function(options)
 	M.options = vim.tbl_deep_extend("keep", options or {}, default_options)
 	validate_options(M.options)
