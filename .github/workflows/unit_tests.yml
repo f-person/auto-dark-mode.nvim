@@ -6,8 +6,8 @@ on:
     branches: [master]
 
 jobs:
-  run_tests:
-    name: Run tests
+  unit_tests:
+    name: Run unit tests
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -21,7 +21,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Run tests
-        uses: nvim-neorocks/nvim-busted-action@v1
+      - uses: nvim-neorocks/nvim-busted-action@v1
         with:
           nvim_version: ${{ matrix.neovim_version }}
