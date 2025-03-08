@@ -85,10 +85,10 @@ M.poll_dark_mode = function(callback)
 			stderr_buffered = true,
 			stdout_buffered = true,
 			on_stderr = function(_, data, _)
-				stderr = data
+				stderr = table.concat(data, " ")
 			end,
 			on_stdout = function(_, data, _)
-				stdout = data
+				stdout = table.concat(data, " ")
 			end,
 			on_exit = function(_, _, _)
 				callback(stdout, stderr)
