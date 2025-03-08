@@ -17,6 +17,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         neovim_version: 
+          - v0.7.2
           - v0.8.3
           - v0.9.5
           - v0.10.4
@@ -32,8 +33,12 @@ jobs:
           key: ${{ runner.os }}-x64-${{ hashFiles('todays-date') }}
 
       - name: Prepare plenary
-        run: |
-          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim _runtime/plenary.nvim
+        uses: actions/checkout@v4
+        with:
+          repository: nvim-lua/plenary.nvim
+          # FIXME: update this once we drop support for neovim 0.7.*
+          ref: 37604d95d8a212478063c40df4b7c48313453d52
+          path: _runtime/plenary.nvim
 
       - uses: rhysd/action-setup-vim@v1
         with:
