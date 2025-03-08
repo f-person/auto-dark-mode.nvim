@@ -15,7 +15,6 @@ jobs:
         os:
           - ubuntu-latest
         neovim_version: 
-          - v0.8.3
           - v0.9.5
           - v0.10.4
           - nightly
