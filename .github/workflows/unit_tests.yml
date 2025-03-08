@@ -1,0 +1,28 @@
+name: Run Tests
+
+on: 
+  pull_request: {}
+  push:
+    branches: [master]
+
+jobs:
+  run_tests:
+    name: Run tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        neovim_version: 
+          - v0.8.3
+          - v0.9.5
+          - v0.10.4
+          - nightly
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        uses: nvim-neorocks/nvim-busted-action@v1
+        with:
+          nvim_version: ${{ matrix.neovim_version }}

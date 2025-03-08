@@ -2,49 +2,35 @@ local M = {}
 
 local uv = vim.uv or vim.loop
 
----@alias Appearance "light" | "dark"
----@alias DetectedOS "Linux" | "Darwin" | "Windows_NT" | "WSL"
-
----@class AutoDarkModeOptions
+---@type AutoDarkModeOptions
 local default_options = {
-	-- Optional. Fallback theme to use if the system theme can't be detected.
-	-- Useful for linux and environments without a desktop manager.
-	---@type Appearance?
 	fallback = "dark",
 
-	-- Optional. The default runs:
-	-- ```lua
-	-- vim.api.nvim_set_option_value('background', 'dark', {})
-	-- ```
-	---@type nil | fun(): nil
-	---@return nil
 	set_dark_mode = function()
 		vim.api.nvim_set_option_value("background", "dark", {})
 	end,
 
-	-- Optional. The default runs:
-	-- ```lua
-	-- vim.api.nvim_set_option_value('background', 'light', {})
-	-- ```
-	---@type nil | fun(): nil
-	---@return nil
 	set_light_mode = function()
 		vim.api.nvim_set_option_value("background", "light", {})
 	end,
 
-	-- Optional. Specifies the `update_interval` milliseconds a theme check will be performed.
-	---@type number?
 	update_interval = 3000,
 }
 
 ---@param options AutoDarkModeOptions
 local function validate_options(options)
-	vim.validate("fallback", options.fallback, function(opt)
-		return vim.tbl_contains({ "dark", "light" }, opt)
-	end, "`fallback` must be either 'light' or 'dark'")
-	vim.validate("set_dark_mode", options.set_dark_mode, "function")
-	vim.validate("set_light_mode", options.set_light_mode, "function")
-	vim.validate("update_interval", options.update_interval, "number")
+	vim.validate({
+		fallback = {
+			options.fallback,
+			function(opt)
+				return vim.tbl_contains({ "dark", "light" }, opt)
+			end,
+			"`fallback` must be either 'light' or 'dark'",
+		},
+		set_dark_mode = { options.set_dark_mode, "function" },
+		set_light_mode = { options.set_light_mode, "function" },
+		update_interval = { options.update_interval, "number" },
+	})
 
 	M.state.setup_correct = true
 end
@@ -145,9 +131,12 @@ M.init = function()
 	M.disable = interval.stop_timer
 end
 
----@param options AutoDarkModeOptions
+---@param options? AutoDarkModeOptions
 ---@return nil
 M.setup = function(options)
+	if not options then
+		options = {}
+	end
 	M.options = vim.tbl_deep_extend("keep", options or {}, default_options)
 	validate_options(M.options)
 
