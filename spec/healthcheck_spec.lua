@@ -1,7 +1,6 @@
 describe("healthchecks", function()
 	it("running :checkhealth auto-dark-mode", function()
 		require("auto-dark-mode").setup()
-
-		vim.cmd(":checkhealth auto-dark-mode")
+		require("auto-dark-mode.health").check()
 	end)
 end)
