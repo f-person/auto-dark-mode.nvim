@@ -1,0 +1,52 @@
+name: Run Tests
+
+on: 
+  pull_request: {}
+  push:
+    branches: [master]
+
+jobs:
+  unit_tests:
+    name: Run unit tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        neovim_version: 
+          - v0.7.2
+          - v0.8.3
+          - v0.9.5
+          - v0.10.4
+          - nightly
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: date +%F > todays-date
+      - name: Restore cache for today's nightly.
+        uses: actions/cache@v4
+        with:
+          path: ~/nvim-nightly
+          key: ${{ runner.os }}-x64-${{ hashFiles('todays-date') }}
+
+      - name: Prepare plenary
+        uses: actions/checkout@v4
+        with:
+          repository: nvim-lua/plenary.nvim
+          # FIXME: update this once we drop support for neovim 0.7.*
+          ref: 37604d95d8a212478063c40df4b7c48313453d52
+          path: _runtime/plenary.nvim
+
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim_version }}
+
+      - name: Run tests
+        env:
+          PLENARY: _runtime/plenary.nvim
+        run: |
+          nvim --headless --noplugin -u tests/minimal.vim -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"
