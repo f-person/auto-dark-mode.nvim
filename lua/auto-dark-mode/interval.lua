@@ -3,17 +3,17 @@ local M = {
 	timer = nil,
 	---@type number
 	timer_id = nil,
-	---@type boolean
-	currently_in_dark_mode = nil,
+	---@type Appearance
+	current_appearance = "dark",
 }
 
 local uv = vim.uv or vim.loop
 
--- Parses the query response for each system, returning `true` if the system is
--- in Dark mode, `false` when in Light mode.
+-- Parses the query response for each system, returning the current appearance,
+-- or `nil` if it can't be resolved.
 ---@param stdout string
 ---@param stderr string
----@return boolean
+---@return Appearance?
 local function parse_query_response(stdout, stderr)
 	if M.state.system == "Linux" then
 		-- https://github.com/flatpak/xdg-desktop-portal/blob/c0f0eb103effdcf3701a1bf53f12fe953fbf0b75/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
@@ -21,43 +21,44 @@ local function parse_query_response(stdout, stderr)
 		-- 1: dark
 		-- 2: light
 		if string.match(stdout, "uint32 1") ~= nil then
-			return true
+			return "dark"
 		elseif string.match(stdout, "uint32 2") ~= nil then
-			return false
+			return "light"
 		else
-			return M.options.fallback == "dark"
+			return M.options.fallback
 		end
 	elseif M.state.system == "Darwin" then
-		return stdout == "Dark\n"
+		return stdout == "Dark\n" and "dark" or "light"
 	elseif M.state.system == "Windows_NT" or M.state.system == "WSL" then
 		-- AppsUseLightTheme REG_DWORD 0x0 : dark
 		-- AppsUseLightTheme REG_DWORD 0x1 : light
-		return string.match(stdout, "0x1") == nil
+		return string.match(stdout, "0x1") and "light" or "dark"
 	end
 
-	return false
+	return nil
 end
 
 -- Executes the `set_dark_mode` and `set_light_mode` hooks when needed,
 -- otherwise it's a no-op.
----@param is_dark_mode boolean
-local function sync_theme(is_dark_mode)
-	if is_dark_mode == M.currently_in_dark_mode then
+---@param appearance Appearance
+---@return nil
+local function sync_theme(appearance)
+	if appearance == M.current_appearance then
 		return
 	end
 
-	M.currently_in_dark_mode = is_dark_mode
-	if M.currently_in_dark_mode then
+	M.current_appearance = appearance
+	if M.current_appearance == "dark" then
 		if vim.system then
 			vim.schedule(M.options.set_dark_mode)
 		else
 			M.options.set_dark_mode()
 		end
-	else
+	elseif M.current_appearance == "light" then
 		if vim.system then
 			vim.schedule(M.options.set_light_mode)
 		else
-			M.options.set_dark_mode()
+			M.options.set_light_mode()
 		end
 	end
 end
@@ -65,6 +66,7 @@ end
 -- Uses a subprocess to query the system for the current dark mode setting.
 -- The callback is called with the plaintext stdout response of the query.
 ---@param callback? fun(stdout: string, stderr: string): nil
+---@return nil
 M.poll_dark_mode = function(callback)
 	-- if no callback is provided, use a no-op
 	if callback == nil then
@@ -97,11 +99,18 @@ M.poll_dark_mode = function(callback)
 	end
 end
 
+---@param stdout string
+---@param stderr string
+---@return nil
 M.parse_callback = function(stdout, stderr)
-	local is_dark_mode = parse_query_response(stdout, stderr)
-	sync_theme(is_dark_mode)
+	local appearance = parse_query_response(stdout, stderr)
+
+	if appearance ~= nil then
+		sync_theme(appearance)
+	end
 end
 
+---@return nil
 M.start_timer = function()
 	---@type number
 	local interval = M.options.update_interval
@@ -119,6 +128,7 @@ M.start_timer = function()
 	end
 end
 
+---@return nil
 M.stop_timer = function()
 	if uv.timer_stop then
 		uv.timer_stop(M.timer)
@@ -129,6 +139,7 @@ end
 
 ---@param options AutoDarkModeOptions
 ---@param state AutoDarkModeState
+---@return nil
 M.start = function(options, state)
 	M.options = options
 	M.state = state
