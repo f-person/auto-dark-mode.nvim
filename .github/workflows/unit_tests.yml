@@ -15,12 +15,30 @@ jobs:
         os:
           - ubuntu-latest
         neovim_version: 
+          - v0.8.3
           - v0.9.5
           - v0.10.4
           - nightly
 
     steps:
       - uses: actions/checkout@v4
-      - uses: nvim-neorocks/nvim-busted-action@v1
+      - run: date +%F > todays-date
+      - name: Restore cache for today's nightly.
+        uses: actions/cache@v4
         with:
-          nvim_version: ${{ matrix.neovim_version }}
+          path: ~/nvim-nightly
+          key: ${{ runner.os }}-x64-${{ hashFiles('todays-date') }}
+
+      - name: Prepare plenary
+        run: |
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+          ln -s "$(pwd)" ~/.local/share/nvim/site/pack/vendor/start
+
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim_version }}
+
+      - name: Run tests
+        run: |
+          nvim --headless --noplugin -u tests/minimal.vim -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"
