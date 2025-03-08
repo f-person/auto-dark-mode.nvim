@@ -1,9 +1,9 @@
 describe("calling setup()", function()
-	it("default config", function()
+	it("with default config", function()
 		require("auto-dark-mode").setup()
 	end)
 
-	it("customized config", function()
+	it("with customized config", function()
 		require("auto-dark-mode").setup({
 			fallback = "light",
 			set_dark_mode = function()
