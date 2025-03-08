@@ -17,7 +17,6 @@ jobs:
           - ubuntu-latest
           - windows-latest
         neovim_version: 
-          - v0.7.2
           - v0.8.3
           - v0.9.5
           - v0.10.4
