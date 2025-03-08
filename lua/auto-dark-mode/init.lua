@@ -78,19 +78,32 @@ M.init = function()
 	elseif M.state.system == "Windows_NT" or M.state.system == "WSL" then
 		local reg = "reg.exe"
 
-		-- on WSL, if `reg.exe` cannot be found on the `$PATH`
-		-- (see interop.appendWindowsPath https://learn.microsoft.com/en-us/windows/wsl/wsl-config),
-		-- assume that it's in the default location
-		if M.state.system == "WSL" and vim.fn.executable("reg.exe") == 0 then
-			local assumed_path = "/mnt/c/Windows/system32/reg.exe"
-
-			if vim.fn.filereadable(assumed_path) == 1 then
-				reg = assumed_path
-			else
-				-- `reg.exe` isn't on `$PATH` or in the default location, so throw an error
+		-- gracefully handle a bunch of WSL specific errors
+		if M.state.system == "WSL" then
+			-- automount not being enabled
+			if not uv.fs_stat("/mnt/c") then
 				error(
-					"auto-dark-mode.nvim: `reg.exe` is not available. To support syncing with the host system, this plugin relies on `reg.exe` being on the `$PATH`."
+					"auto-dark-mode.nvim: Your WSL configuration doesn't enable `automount`. Please see https://learn.microsoft.com/en-us/windows/wsl/wsl-config#automount-settings."
 				)
+			end
+
+			-- binfmt not being provided for windows executables
+			if not uv.fs_stat("/proc/sys/fs/binfmt_misc/WSLInterop") then
+				error(
+					"auto-dark-mode.nvim: Your WSL configuration doesn't enable `interop`. Please see https://learn.microsoft.com/en-us/windows/wsl/wsl-config#interop-settings."
+				)
+			end
+
+			-- `appendWindowsPath` being set to false
+			if vim.fn.executable("reg.exe") == 0 then
+				local hardcoded_path = "/mnt/c/Windows/system32/reg.exe"
+				if uv.fs_stat(hardcoded_path) then
+					reg = hardcoded_path
+				else
+					error(
+						"auto-dark-mode.nvim: `reg.exe` cannot be found. To support syncing with the host system, this plugin relies on `reg.exe` being on the `$PATH`."
+					)
+				end
 			end
 		end
 
