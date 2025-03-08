@@ -13,7 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          - macos-latest
           - ubuntu-latest
+          - windows-latest
         neovim_version: 
           - v0.8.3
           - v0.9.5
