@@ -81,7 +81,7 @@ M.init = function()
 		-- gracefully handle a bunch of WSL specific errors
 		if M.state.system == "WSL" then
 			-- automount not being enabled
-			if not uv.fs_stat("/mnt/c") then
+			if not uv.fs_stat("/mnt/c/Windows") then
 				error(
 					"auto-dark-mode.nvim: Your WSL configuration doesn't enable `automount`. Please see https://learn.microsoft.com/en-us/windows/wsl/wsl-config#automount-settings."
 				)
