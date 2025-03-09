@@ -111,9 +111,9 @@ milliseconds. The value needs to be higher than the amount of milliseconds it
 takes to query your system for the dark mode state. Otherwise, you risk
 freezing neovim on shutdown.
 
-`fallback` specifies the theme to use when the auto-detection fails. This can
-be particularly useful to specify a default version when remotely connecting
-via SSH, or when using neovim on a tty.
+`fallback` specifies the appearance (`"dark" | "light"`) to use when the
+auto-detection fails. This can be particularly useful to specify a default
+version when remotely connecting via SSH, or when using neovim on a tty.
 
 ## 🚀 Usage
 
