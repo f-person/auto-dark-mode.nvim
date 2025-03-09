@@ -88,7 +88,12 @@ M.init = function()
 			end
 
 			-- binfmt not being provided for windows executables
-			if not uv.fs_stat("/proc/sys/fs/binfmt_misc/WSLInterop") then
+			if
+				not (
+					uv.fs_stat("/proc/sys/fs/binfmt_misc/WSLInterop")
+					or uv.fs_stat("/proc/sys/fs/binfmt_misc/WSLInterop-late")
+				)
+			then
 				error(
 					"auto-dark-mode.nvim: Your WSL configuration doesn't enable `interop`. Please see https://learn.microsoft.com/en-us/windows/wsl/wsl-config#interop-settings."
 				)
