@@ -1,4 +1,4 @@
-*auto-dark-mode.txt*Plugin that automatically changes the editor appearance based on system settings.
+*auto-dark-mode.txt*      sync nvim with your desktop environment's appearance
 
 ==============================================================================
 Table of Contents                           *auto-dark-mode-table-of-contents*
