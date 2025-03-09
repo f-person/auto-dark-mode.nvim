@@ -27,7 +27,7 @@ local function parse_query_response(stdout, stderr)
 		else
 			return M.options.fallback
 		end
-	elseif M.state.system == "Darwin" then
+	elseif M.state.system == "Darwin" or M.state.system == "OrbStack" then
 		return stdout == "Dark\n" and "dark" or "light"
 	elseif M.state.system == "Windows_NT" or M.state.system == "WSL" then
 		-- AppsUseLightTheme REG_DWORD 0x0 : dark
