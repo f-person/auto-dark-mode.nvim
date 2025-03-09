@@ -12,12 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     name: README to vimdoc
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: kdheepak/panvimdoc@main
+      - uses: kdheepak/panvimdoc@v4.0.1
         with:
-          vimdoc: auto-dark-mode
-          description: Plugin that automatically changes the editor appearance based on system settings.
+          vimdoc: "auto-dark-mode"
+          version: "NVIM v0.7.0 -> v0.10.4"
+          description: "Plugin that automatically changes the editor appearance based on system settings."
+          demojify: true
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:

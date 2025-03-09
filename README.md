@@ -1,4 +1,6 @@
+<!-- panvimdoc-ignore-start -->
 # auto-dark-mode.nvim
+<!-- panvimdoc-ignore-end -->
 
 A Neovim plugin for macOS, Linux, and Windows that automatically changes the
 editor appearance based on system settings.
@@ -32,14 +34,31 @@ editor appearance based on system settings.
 ## 📋 Requirements
 Your operating system needs to be:
 
-- a Linux desktop environment that implements
-  [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629),
-  such as
+- a Linux desktop environment that implements [`org.freedesktop.appearance.color-scheme`](https://github.com/flatpak/xdg-desktop-portal/issues/629), such as
   - [Gnome](https://gnome.org)
   - [KDE](https://kde.org)
   - [darkman](https://gitlab.com/WhyNotHugo/darkman) for window managers
 - macOS Mojave or newer
 - Windows 10 or newer (or WSL)
+
+<details>
+<summary>Notes for WSL</summary>
+
+To query the appearance of the Windows host system, two options **must be**
+enabled in `/etc/wsl.conf`:
+
+```ini
+[automount]
+enabled = true
+
+[interop]
+enabled = true
+```
+
+See [the Microsoft docs](https://learn.microsoft.com/en-us/windows/wsl/wsl-config)
+for more information about WSL settings.
+
+</details>
 
 ## 📦 Installation
 

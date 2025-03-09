@@ -1,10 +1,21 @@
+---@meta
+
+---@alias Appearance "light" | "dark"
+---@alias DetectedOS "Linux" | "Darwin" | "Windows_NT" | "WSL"
+
 ---@class AutoDarkModeOptions
--- Optional. If not provided, `vim.api.nvim_set_option_value('background', 'dark')` will be used.
----@field set_dark_mode nil | fun(): nil
--- Optional. If not provided, `vim.api.nvim_set_option_value('background', 'light')` will be used.
----@field set_light_mode nil | fun(): nil
--- Every `update_interval` milliseconds a theme check will be performed.
----@field update_interval number?
 -- Optional. Fallback theme to use if the system theme can't be detected.
 -- Useful for linux and environments without a desktop manager.
----@field fallback "light" | "dark" | nil
+---@field fallback? Appearance
+-- Optional. The default runs:
+-- ```lua
+-- vim.api.nvim_set_option_value('background', 'dark', {})
+-- ```
+---@field set_dark_mode? fun(): nil
+-- Optional. The default runs:
+-- ```lua
+-- vim.api.nvim_set_option_value('background', 'light', {})
+-- ```
+---@field set_light_mode? fun(): nil
+-- Optional. Specifies the `update_interval` milliseconds a theme check will be performed.
+---@field update_interval? number
