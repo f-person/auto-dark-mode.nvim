@@ -110,14 +110,14 @@ M.parse_callback = function(stdout, stderr)
 	end
 end
 
+local timer_callback = function()
+	M.poll_dark_mode(M.parse_callback)
+end
+
 ---@return nil
 M.start_timer = function()
 	---@type number
 	local interval = M.options.update_interval
-
-	local timer_callback = function()
-		M.poll_dark_mode(M.parse_callback)
-	end
 
 	-- needs to check for `vim.system` because the poll function depends on it
 	if uv and vim.system then
@@ -143,6 +143,9 @@ end
 M.start = function(options, state)
 	M.options = options
 	M.state = state
+
+	-- act as if the timer has finished once to instantly sync on startup
+	timer_callback()
 
 	M.start_timer()
 end
