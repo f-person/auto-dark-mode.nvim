@@ -51,12 +51,18 @@ M.init = function()
 
 	if string.match(os_uname.release, "WSL") then
 		M.state.system = "WSL"
+	elseif string.match(os_uname.release, "orbstack") then
+		M.state.system = "OrbStack"
 	else
 		M.state.system = os_uname.sysname
 	end
 
-	if M.state.system == "Darwin" then
-		M.state.query_command = { "defaults", "read", "-g", "AppleInterfaceStyle" }
+	if M.state.system == "Darwin" or M.state.system == "OrbStack" then
+		local query_command = { "defaults", "read", "-g", "AppleInterfaceStyle" }
+		if M.state.system == "OrbStack" then
+			query_command = vim.list_extend({ "mac" }, query_command)
+		end
+		M.state.query_command = query_command
 	elseif M.state.system == "Linux" then
 		if vim.fn.executable("dbus-send") == 0 then
 			error(

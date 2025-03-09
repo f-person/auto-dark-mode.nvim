@@ -1,7 +1,7 @@
 ---@meta
 
 ---@alias Appearance "light" | "dark"
----@alias DetectedOS "Linux" | "Darwin" | "Windows_NT" | "WSL"
+---@alias DetectedOS "Linux" | "Darwin" | "Windows_NT" | "WSL" | "OrbStack"
 
 ---@class AutoDarkModeOptions
 -- Optional. Fallback theme to use if the system theme can't be detected.
