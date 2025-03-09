@@ -122,18 +122,16 @@ M.init = function()
 	if (M.state.system == "Darwin" or M.state.system == "Linux") and uv.getuid() == 0 then
 		local sudo_user = vim.env.SUDO_USER
 
-		if sudo_user ~= nil then
-			-- prepend the command with `su - $SUDO_USER -c`
-			local extra_args = { "su", "-", sudo_user, "-c" }
-			for _, v in pairs(M.state.query_command) do
-				table.insert(extra_args, v)
-			end
-			M.state.query_command = extra_args
-		else
+		if not sudo_user then
 			error(
-				"auto-dark-mode.nvim: Running as `root`, but `$SUDO_USER` is not set. Please open an issue to add support for your system."
+				"auto-dark-mode.nvim: Running as `root`, but `$SUDO_USER` is not set. Please open an issue to add support for your setup."
 			)
 		end
+
+		local prefixed_cmd = { "sudo", "--user", sudo_user }
+		vim.list_extend(prefixed_cmd, M.state.query_command)
+
+		M.state.query_command = prefixed_cmd
 	end
 
 	local interval = require("auto-dark-mode.interval")
