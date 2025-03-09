@@ -3,36 +3,46 @@
 ==============================================================================
 Table of Contents                           *auto-dark-mode-table-of-contents*
 
-1. auto-dark-mode.nvim                    |auto-dark-mode-auto-dark-mode.nvim|
-  - 📋 Requirements   |auto-dark-mode-auto-dark-mode.nvim-📋-requirements|
-  - 📦 Installation   |auto-dark-mode-auto-dark-mode.nvim-📦-installation|
-  - ⚙️ Configuration|auto-dark-mode-auto-dark-mode.nvim-⚙️-configuration|
-  - 🚀 Usage                 |auto-dark-mode-auto-dark-mode.nvim-🚀-usage|
-  - 💖 Contributors   |auto-dark-mode-auto-dark-mode.nvim-💖-contributors|
-2. Links                                                |auto-dark-mode-links|
-
-==============================================================================
-1. auto-dark-mode.nvim                    *auto-dark-mode-auto-dark-mode.nvim*
-
+  - Requirements                                 |auto-dark-mode-requirements|
+  - Installation                                 |auto-dark-mode-installation|
+  - Configuration                               |auto-dark-mode-configuration|
+  - Usage                                               |auto-dark-mode-usage|
+  - Contributors                                 |auto-dark-mode-contributors|
+1. Links                                                |auto-dark-mode-links|
 A Neovim plugin for macOS, Linux, and Windows that automatically changes the
 editor appearance based on system settings.
 
 
-📋 REQUIREMENTS       *auto-dark-mode-auto-dark-mode.nvim-📋-requirements*
+REQUIREMENTS                                     *auto-dark-mode-requirements*
 
 Your operating system needs to be:
 
-- a Linux desktop environment that implements
-    `org.freedesktop.appearance.color-scheme` <https://github.com/flatpak/xdg-desktop-portal/issues/629>,
-    such as
+- a Linux desktop environment that implements `org.freedesktop.appearance.color-scheme` <https://github.com/flatpak/xdg-desktop-portal/issues/629>, such as
     - Gnome <https://gnome.org>
     - KDE <https://kde.org>
     - darkman <https://gitlab.com/WhyNotHugo/darkman> for window managers
 - macOS Mojave or newer
 - Windows 10 or newer (or WSL)
 
+Notes for WSL ~
 
-📦 INSTALLATION       *auto-dark-mode-auto-dark-mode.nvim-📦-installation*
+To query the appearance of the Windows host system, two options **must be**
+enabled in `/etc/wsl.conf`
+
+>ini
+    [automount]
+    enabled = true
+    
+    [interop]
+    enabled = true
+<
+
+Seethe Microsoft docs
+<https://learn.microsoft.com/en-us/windows/wsl/wsl-config> for more information
+about WSL settings.
+
+
+INSTALLATION                                     *auto-dark-mode-installation*
 
 Install the plugin with your preferred package manager:
 
@@ -59,7 +69,7 @@ VIM-PLUG ~
 <
 
 
-⚙️ CONFIGURATION *auto-dark-mode-auto-dark-mode.nvim-⚙️-configuration*
+CONFIGURATION                                   *auto-dark-mode-configuration*
 
 **auto-dark-mode** comes with the following defaults:
 
@@ -90,7 +100,7 @@ be particularly useful to specify a default version when remotely connecting
 via SSH, or when using neovim on a tty.
 
 
-🚀 USAGE                     *auto-dark-mode-auto-dark-mode.nvim-🚀-usage*
+USAGE                                                   *auto-dark-mode-usage*
 
 
 DISABLING AT RUNTIME ~
@@ -99,15 +109,15 @@ You can disable `auto-dark-mode.nvim` at runtime via `lua
 require('auto-dark-mode').disable()`.
 
 
-💖 CONTRIBUTORS       *auto-dark-mode-auto-dark-mode.nvim-💖-contributors*
+CONTRIBUTORS                                     *auto-dark-mode-contributors*
 
 <https://github.com/f-person/auto-dark-mode.nvim/graphs/contributors>
 
-👩‍🎤 Special thanks to @nekowinston <https://github.com/nekowinston> for
-maintaining the plugin 👩‍🎤
+‍ Special thanks to @nekowinston <https://github.com/nekowinston> for
+maintaining the plugin ‍
 
 ==============================================================================
-2. Links                                                *auto-dark-mode-links*
+1. Links                                                *auto-dark-mode-links*
 
 1. **: https://contrib.rocks/image?repo=f-person/auto-dark-mode.nvim
 2. *@nekowinston*: 
