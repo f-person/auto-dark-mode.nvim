@@ -105,6 +105,8 @@ end
 M.parse_callback = function(stdout, stderr)
 	local appearance = parse_query_response(stdout, stderr)
 
+	vim.print(vim.inspect({ stdout = stdout, stderr = stderr }))
+
 	if appearance ~= nil then
 		sync_theme(appearance)
 	end
