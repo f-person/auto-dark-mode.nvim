@@ -3,8 +3,8 @@ local M = {
 	timer = nil,
 	---@type number
 	timer_id = nil,
-	---@type Appearance
-	current_appearance = "dark",
+	---@type Appearance?
+	current_appearance = nil,
 }
 
 local uv = vim.uv or vim.loop
