@@ -22,7 +22,7 @@ local function parse_query_response(stdout, stderr)
 		-- 2: light
 		if string.match(stdout, "uint32 1") ~= nil then
 			return "dark"
-		elseif string.match(stdout, "uint32 2") ~= nil then
+		elseif string.match(stdout, "uint32 [02]") ~= nil then
 			return "light"
 		else
 			return M.options.fallback
