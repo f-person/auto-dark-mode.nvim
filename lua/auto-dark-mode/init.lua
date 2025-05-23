@@ -74,7 +74,7 @@ M.init = function()
 			"dbus-send",
 			"--session",
 			"--print-reply=literal",
-			"--reply-timeout=1000",
+			"--reply-timeout=5000",
 			"--dest=org.freedesktop.portal.Desktop",
 			"/org/freedesktop/portal/desktop",
 			"org.freedesktop.portal.Settings.Read",
