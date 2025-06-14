@@ -19,18 +19,12 @@ local default_options = {
 
 ---@param options AutoDarkModeOptions
 local function validate_options(options)
-	vim.validate({
-		fallback = {
-			options.fallback,
-			function(opt)
-				return vim.tbl_contains({ "dark", "light" }, opt)
-			end,
-			"`fallback` to be either 'light' or 'dark'",
-		},
-		set_dark_mode = { options.set_dark_mode, "function" },
-		set_light_mode = { options.set_light_mode, "function" },
-		update_interval = { options.update_interval, "number" },
-	})
+	vim.validate("fallback", options.fallback, function(opt)
+		return vim.tbl_contains({ "dark", "light" }, opt)
+	end, "`fallback` to be either 'light' or 'dark'")
+	vim.validate("set_dark_mode", options.set_dark_mode, "function")
+	vim.validate("set_light_mode", options.set_light_mode, "function")
+	vim.validate("update_interval", options.update_interval, "number")
 
 	M.state.setup_correct = true
 end
