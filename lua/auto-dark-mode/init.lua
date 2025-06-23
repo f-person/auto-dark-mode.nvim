@@ -42,6 +42,7 @@ local function validate_options(options)
 			update_interval = { options.update_interval, "number" },
 		})
 	end
+
 	M.state.setup_correct = true
 end
 
