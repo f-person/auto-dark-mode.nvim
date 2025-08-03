@@ -16,6 +16,10 @@ local uv = vim.uv or vim.loop
 ---@return Appearance?
 local function parse_query_response(stdout, stderr)
 	if M.state.system == "Linux" then
+        if stderr ~= "" then
+            return nil;
+        end
+
 		-- https://github.com/flatpak/xdg-desktop-portal/blob/c0f0eb103effdcf3701a1bf53f12fe953fbf0b75/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
 		-- 0: no preference
 		-- 1: dark
