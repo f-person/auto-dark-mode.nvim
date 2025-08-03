@@ -16,9 +16,9 @@ local uv = vim.uv or vim.loop
 ---@return Appearance?
 local function parse_query_response(stdout, stderr)
 	if M.state.system == "Linux" then
-        if stderr ~= "" then
-            return nil;
-        end
+                if stderr ~= "" then
+                    return nil;
+                end
 
 		-- https://github.com/flatpak/xdg-desktop-portal/blob/c0f0eb103effdcf3701a1bf53f12fe953fbf0b75/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
 		-- 0: no preference
@@ -65,6 +65,33 @@ local function sync_theme(appearance)
 			M.options.set_light_mode()
 		end
 	end
+end
+
+-- Uses a subprocess to monitor the system for the current dark mode setting.
+-- The callback is called with the plaintext stdout response of the query.
+---@param callback? fun(stdout: string, stderr: string): nil
+---@return nil
+M.monitor_dark_mode = function (callback)
+    -- if no callback is provided, use a no-op
+    callback = callback or function() end
+
+    vim.fn.jobstart(M.state.monitor_command,
+        {
+            on_stdout = function (_, data, _)
+                data = table.concat(data, "")
+
+                if string.match(data, "uint32") then
+                    -- check if this was a signal update with a new value,
+                    -- as otherwise the fallback option will be incorrectly triggered
+                    callback(data, "")
+                end
+            end,
+            on_stderr = function (_, data, _)
+                data = table.concat(data, "")
+                callback("", data)
+            end
+        }
+    );
 end
 
 -- Uses a subprocess to query the system for the current dark mode setting.
@@ -151,7 +178,13 @@ M.start = function(options, state)
 	-- act as if the timer has finished once to instantly sync on startup
 	timer_callback()
 
+    -- if the system supports monitoring, prefer that over polling updates
+    if M.state.monitor_command then
+        M.monitor_dark_mode(M.parse_callback)
+    else
 	M.start_timer()
+    end
+
 end
 
 return M
