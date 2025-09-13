@@ -75,23 +75,83 @@ M.init = function()
 		end
 		M.state.query_command = query_command
 	elseif M.state.system == "Linux" then
-		if vim.fn.executable("dbus-send") == 0 then
-			error(
-				"auto-dark-mode.nvim: `dbus-send` is not available. The Linux implementation of auto-dark-mode.nvim relies on `dbus-send` being on the `$PATH`."
-			)
-		end
+	  -- Detect a real desktop session (avoid DBus on raw SSH/TTY)
+	  local has_display = (vim.env.DISPLAY and #vim.env.DISPLAY > 0)
+	                   or (vim.env.WAYLAND_DISPLAY and #vim.env.WAYLAND_DISPLAY > 0)
 
-		M.state.query_command = {
-			"dbus-send",
-			"--session",
-			"--print-reply=literal",
-			"--reply-timeout=1000",
-			"--dest=org.freedesktop.portal.Desktop",
-			"/org/freedesktop/portal/desktop",
-			"org.freedesktop.portal.Settings.Read",
-			"string:org.freedesktop.appearance",
-			"string:color-scheme",
-		}
+	  -- Normalize desktop/session hints
+	  local session = ((vim.env.XDG_CURRENT_DESKTOP or vim.env.DESKTOP_SESSION or "") .. ""):lower()
+	  local is_gnome  = session:find("gnome", 1, true) ~= nil
+	  local is_kde    = session:find("kde",   1, true) ~= nil or session:find("plasma", 1, true) ~= nil
+
+	  if not has_display then
+	    -- Headless / raw SSH: do NOT query anything; empty output -> parser uses fallback
+	    -- (Parser: "" -> M.options.fallback)
+	    M.state.query_command = { "sh", "-lc", "printf ''" }
+
+	    -- Avoid polling when headless
+	    M.options.update_interval = 0
+	  else
+	    -- Prefer native, desktop-specific backends when they match the session
+	    if is_gnome and vim.fn.executable("gsettings") == 1 then
+	      -- Map GNOME’s value to the DBus-portal style the parser expects:
+	      --   dark   -> "uint32 1"
+	      --   light  -> "uint32 0"
+	      local cmd = [[
+	        if gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | grep -q 'prefer-dark'; then
+	          echo 'uint32 1'
+	        else
+	          echo 'uint32 0'
+	        fi
+	      ]]
+	      M.state.query_command = { "sh", "-lc", cmd }
+
+	    elseif is_kde and vim.fn.executable("kreadconfig5") == 1 then
+	      -- KDE/Plasma: "Breeze Dark" etc. -> dark
+	      local cmd = [[
+	        cs="$(kreadconfig5 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
+	        case "${cs,,}" in *dark*) echo 'uint32 1';; *) echo 'uint32 0';; esac
+	      ]]
+	      M.state.query_command = { "sh", "-lc", cmd }
+
+	    -- If session vars are unreliable, still try native tools opportunistically
+	    elseif vim.fn.executable("gsettings") == 1 then
+	      local cmd = [[
+	        if gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | grep -q 'prefer-dark'; then
+	          echo 'uint32 1'
+	        else
+	          echo 'uint32 0'
+	        fi
+	      ]]
+	      M.state.query_command = { "sh", "-lc", cmd }
+
+	    elseif vim.fn.executable("kreadconfig5") == 1 then
+	      local cmd = [[
+	        cs="$(kreadconfig5 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
+	        case "${cs,,}" in *dark*) echo 'uint32 1';; *) echo 'uint32 0';; esac
+	      ]]
+	      M.state.query_command = { "sh", "-lc", cmd }
+
+	    elseif vim.fn.executable("dbus-send") == 1 then
+	      -- Fallback: xdg-desktop-portal (short timeout to avoid visible stalls)
+	      M.state.query_command = {
+	        "dbus-send",
+	        "--session",
+	        "--print-reply=literal",
+	        "--reply-timeout=200",  -- shorter than 1000ms
+	        "--dest=org.freedesktop.portal.Desktop",
+	        "/org/freedesktop/portal/desktop",
+	        "org.freedesktop.portal.Settings.Read",
+	        "string:org.freedesktop.appearance",
+	        "string:color-scheme",
+	      }
+
+	    else
+	      -- Nothing suitable available: empty -> parser uses fallback
+	      M.state.query_command = { "sh", "-lc", "printf ''" }
+	      M.options.update_interval = 0
+	    end
+	  end
 	elseif M.state.system == "Windows_NT" or M.state.system == "WSL" then
 		local reg = "reg.exe"
 
