@@ -95,14 +95,13 @@ M.init = function()
 			"string:color-scheme",
 		}
 
-        if vim.fn.executable("dbus-monitor") ~= 0 then
-            M.state.monitor_command = {
-                "dbus-monitor",
-                "--session",
-                "type=signal,interface=org.freedesktop.portal.Settings,member=SettingChanged,path=/org/freedesktop/portal/desktop,arg0='org.freedesktop.appearance',arg1='color-scheme'",
-            }
-
-        end
+		if vim.fn.executable("dbus-monitor") ~= 0 then
+			M.state.monitor_command = {
+				"dbus-monitor",
+				"--session",
+				"type=signal,interface=org.freedesktop.portal.Settings,member=SettingChanged,path=/org/freedesktop/portal/desktop,arg0='org.freedesktop.appearance',arg1='color-scheme'",
+			}
+		end
 	elseif M.state.system == "Windows_NT" or M.state.system == "WSL" then
 		local reg = "reg.exe"
 
