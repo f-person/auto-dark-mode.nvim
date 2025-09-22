@@ -179,7 +179,7 @@ M.start = function(options, state)
 	timer_callback()
 
     -- if the system supports monitoring, prefer that over polling updates
-    if M.state.monitor_command then
+    if next(M.state.monitor_command) ~= nil then
         M.monitor_dark_mode(M.parse_callback)
     else
 	    M.start_timer()
