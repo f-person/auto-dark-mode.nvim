@@ -75,21 +75,39 @@ M.monitor_dark_mode = function(callback)
 	-- if no callback is provided, use a no-op
 	callback = callback or function() end
 
-	vim.fn.jobstart(M.state.monitor_command, {
-		on_stdout = function(_, data, _)
-			data = table.concat(data, "")
+	if vim.system then
+		vim.system(M.state.monitor_command, {
+			text = true,
+			stdout = function(_, data)
+				if string.match(data, "uint32") then
+					-- check if this was a signal update with a new value,
+					-- as otherwise the fallback option will be incorrectly triggered
+					callback(data, "")
+				end
+			end,
+			stderr = function(_, data)
+				callback("", data)
+			end,
+		})
+	else
+		-- Legacy implementation using `vim.fn.jobstart` instead of `vim.system`,
+		-- for use in neovim <0.10.0
+		vim.fn.jobstart(M.state.monitor_command, {
+			on_stdout = function(_, data, _)
+				data = table.concat(data, "")
 
-			if string.match(data, "uint32") then
-				-- check if this was a signal update with a new value,
-				-- as otherwise the fallback option will be incorrectly triggered
-				callback(data, "")
-			end
-		end,
-		on_stderr = function(_, data, _)
-			data = table.concat(data, "")
-			callback("", data)
-		end,
-	})
+				if string.match(data, "uint32") then
+					-- check if this was a signal update with a new value,
+					-- as otherwise the fallback option will be incorrectly triggered
+					callback(data, "")
+				end
+			end,
+			on_stderr = function(_, data, _)
+				data = table.concat(data, "")
+				callback("", data)
+			end,
+		})
+	end
 end
 
 -- Uses a subprocess to query the system for the current dark mode setting.
