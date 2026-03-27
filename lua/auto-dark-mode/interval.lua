@@ -5,6 +5,8 @@ local M = {
 	timer_id = nil,
 	---@type Appearance?
 	current_appearance = nil,
+	---@type vim.SystemObj?
+	monitor_process = nil,
 }
 
 local uv = vim.uv or vim.loop
@@ -76,7 +78,7 @@ M.monitor_dark_mode = function(callback)
 	callback = callback or function() end
 
 	if vim.system then
-		vim.system(M.state.monitor_command, {
+		M.monitor_process = vim.system(M.state.monitor_command, {
 			text = true,
 			stdout = function(_, data)
 				if string.match(data, "uint32") then
@@ -197,6 +199,16 @@ M.start = function(options, state)
 	-- if the system supports monitoring, prefer that over polling updates
 	if next(M.state.monitor_command) ~= nil then
 		M.monitor_dark_mode(M.parse_callback)
+		vim.api.nvim_create_autocmd("VimLeavePre", {
+			callback = function()
+				if M.monitor_process ~= nil then
+					-- FIXME: Neovim doesn't properly kill processes spawned `vim.system`
+					-- see https://github.com/neovim/neovim/issues/29475
+					pcall(M.monitor_process.kill, M.monitor_process, "sigterm")
+					M.monitor_process = nil
+				end
+			end,
+		})
 	else
 		M.start_timer()
 	end
