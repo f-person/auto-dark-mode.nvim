@@ -81,7 +81,7 @@ M.monitor_dark_mode = function(callback)
 		M.monitor_process = vim.system(M.state.monitor_command, {
 			text = true,
 			stdout = function(_, data)
-				if string.match(data, "uint32") then
+				if string.match(data or "", "uint32") then
 					-- check if this was a signal update with a new value,
 					-- as otherwise the fallback option will be incorrectly triggered
 					callback(data, "")
@@ -96,7 +96,7 @@ M.monitor_dark_mode = function(callback)
 		-- for use in neovim <0.10.0
 		vim.fn.jobstart(M.state.monitor_command, {
 			on_stdout = function(_, data, _)
-				data = table.concat(data, "")
+				data = table.concat(data or {}, "")
 
 				if string.match(data, "uint32") then
 					-- check if this was a signal update with a new value,
