@@ -82,6 +82,7 @@ Install the plugin with your preferred package manager:
 
 ```vim
 Plug 'f-person/auto-dark-mode.nvim'
+lua require("auto-dark-mode").setup()
 ```
 
 ## ⚙️ Configuration
