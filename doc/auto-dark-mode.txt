@@ -66,6 +66,7 @@ VIM-PLUG ~
 
 >vim
     Plug 'f-person/auto-dark-mode.nvim'
+    lua require("auto-dark-mode").setup()
 <
 
 
