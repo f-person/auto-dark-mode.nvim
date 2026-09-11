@@ -15,6 +15,8 @@ local default_options = {
 	end,
 
 	update_interval = 3000,
+
+	sync_start = false,
 }
 
 ---@param options AutoDarkModeOptions
@@ -28,6 +30,7 @@ local function validate_options(options)
 		vim.validate("set_dark_mode", options.set_dark_mode, "function")
 		vim.validate("set_light_mode", options.set_light_mode, "function")
 		vim.validate("update_interval", options.update_interval, "number")
+		vim.validate("sync_start", options.sync_start, "boolean")
 	else
 		vim.validate({
 			fallback = {
@@ -40,6 +43,7 @@ local function validate_options(options)
 			set_dark_mode = { options.set_dark_mode, "function" },
 			set_light_mode = { options.set_light_mode, "function" },
 			update_interval = { options.update_interval, "number" },
+			sync_start = { options.sync_start, "boolean" },
 		})
 	end
 

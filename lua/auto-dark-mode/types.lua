@@ -19,3 +19,5 @@
 ---@field set_light_mode? fun(): nil
 -- Optional. Specifies the `update_interval` milliseconds a theme check will be performed.
 ---@field update_interval? number
+-- Optional. Force synchronous (blocking) query of dark mode at start
+---@field sync_start? boolean

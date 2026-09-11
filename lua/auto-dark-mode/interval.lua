@@ -48,20 +48,22 @@ end
 -- otherwise it's a no-op.
 ---@param appearance Appearance
 ---@return nil
-local function sync_theme(appearance)
+local function sync_theme(appearance, sync)
 	if appearance == M.current_appearance then
 		return
 	end
 
+	local asynchronous = not sync
+
 	M.current_appearance = appearance
 	if M.current_appearance == "dark" then
-		if vim.system then
+		if asynchronous and vim.system then
 			vim.schedule(M.options.set_dark_mode)
 		else
 			M.options.set_dark_mode()
 		end
 	elseif M.current_appearance == "light" then
-		if vim.system then
+		if asynchronous and vim.system then
 			vim.schedule(M.options.set_light_mode)
 		else
 			M.options.set_light_mode()
@@ -114,53 +116,86 @@ end
 
 -- Uses a subprocess to query the system for the current dark mode setting.
 -- The callback is called with the plaintext stdout response of the query.
----@param callback? fun(stdout: string, stderr: string): nil
----@return nil
-M.poll_dark_mode = function(callback)
-	-- if no callback is provided, use a no-op
+---@param callback? fun(stdout: string, stderr: string, sync: boolean)
+---@param sync? boolean
+M.poll_dark_mode = function(callback, sync)
+	if sync == nil then
+		sync = false
+	end
 	if callback == nil then
 		callback = function() end
 	end
 
 	if vim.system then
-		vim.system(M.state.query_command, { text = true }, function(data)
-			callback(data.stdout, data.stderr)
-		end)
-	else
-		-- Legacy implementation using `vim.fn.jobstart` instead of `vim.system`,
-		-- for use in neovim <0.10.0
-		local stdout = ""
-		local stderr = ""
+		-- Neovim ≥ 0.10 → support vim.system(...)
 
-		vim.fn.jobstart(M.state.query_command, {
-			stderr_buffered = true,
-			stdout_buffered = true,
-			on_stderr = function(_, data, _)
-				stderr = table.concat(data, " ")
-			end,
-			on_stdout = function(_, data, _)
-				stdout = table.concat(data, " ")
-			end,
-			on_exit = function(_, _, _)
-				callback(stdout, stderr)
-			end,
-		})
+		local cb -- wrapper for callback function to be passed to vim.system(...)
+		if sync then
+			cb = nil
+		else
+			cb = function(data)
+				if callback ~= nil then
+					callback(data.stdout or "", data.stderr or "", false)
+				end
+			end
+		end
+
+		local proc = vim.system(M.state.query_command, { text = true }, cb)
+		if sync then
+			-- No callback here. Read stdout/stderr from :wait() result.
+			local res = proc:wait()
+			callback(res.stdout or "", res.stderr or "", true)
+		end
+	else
+		-- Legacy Neovim
+		if sync then
+			-- blocking shell invocation
+			local parts = {}
+			for _, a in ipairs(M.state.query_command) do
+				parts[#parts + 1] = vim.fn.shellescape(a)
+			end
+			-- in legacy Neovim only returns stdout, not stderr
+			local out = vim.fn.system(table.concat(parts, " "))
+			callback(out or "", "", true)
+		else
+			-- async jobstart
+			local stdout, stderr = "", ""
+			vim.fn.jobstart(M.state.query_command, {
+				-- async jobstart MUST NOT run in a fast event: defer it
+				vim.schedule(function()
+					local stdout, stderr = "", ""
+					vim.fn.jobstart(M.state.query_command, {
+						stderr_buffered = true,
+						stdout_buffered = true,
+						on_stderr = function(_, data, _)
+							stderr = table.concat(data, " ")
+						end,
+						on_stdout = function(_, data, _)
+							stdout = table.concat(data, " ")
+						end,
+						on_exit = function(_, _, _)
+							callback(stdout, stderr, false)
+						end,
+					})
+				end),
+			})
+		end
 	end
 end
 
 ---@param stdout string
 ---@param stderr string
 ---@return nil
-M.parse_callback = function(stdout, stderr)
+M.parse_callback = function(stdout, stderr, sync)
 	local appearance = parse_query_response(stdout, stderr)
 
 	if appearance ~= nil then
-		sync_theme(appearance)
+		sync_theme(appearance, sync)
 	end
 end
 
 local timer_callback = function()
-	M.poll_dark_mode(M.parse_callback)
+	M.poll_dark_mode(M.parse_callback, false)
 end
 
 ---@return nil
@@ -193,8 +228,10 @@ M.start = function(options, state)
 	M.options = options
 	M.state = state
 
-	-- act as if the timer has finished once to instantly sync on startup
-	timer_callback()
+	local sync = M.options.sync_start == true -- whether to poll synchronously (blocking behavior)
+
+	-- Do the first poll to instantly sync on startup
+	M.poll_dark_mode(M.parse_callback, sync)
 
 	-- if the system supports monitoring, prefer that over polling updates
 	if next(M.state.monitor_command) ~= nil then
